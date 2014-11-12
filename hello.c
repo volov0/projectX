@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
 	printf("Vole\n");
 
 	/* Return. */
-	return 1;
+	return EXIT_SUCCESS;
 
 	/* unreachable */
 }

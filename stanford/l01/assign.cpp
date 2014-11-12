@@ -1,4 +1,4 @@
-/* 
+/** 
  * Stanford sample 
  *
  * Vaclav Koudelka
@@ -10,7 +10,7 @@
 
 using namespace std;
 
-/*
+/**
  * This is main function
  */
 int main(int argc, char **argv) {
@@ -32,20 +32,20 @@ int main(int argc, char **argv) {
 	}
 	/* test 3 - preteceni pro short      */
 	{
-		int i = 8388608 + 2097152 + 16384 + 7;             /* 2^23 + 2^21 + 2^14 + 7 */
-		short s = i;                                       /* bude oriznuto          */ 
+		int i = 8388608 + 2097152 + 16384 + 7;             // 2^23 + 2^21 + 2^14 + 7   
+		short s = i;                                       // bude oriznuto             
 		cout << "test 03 ... " << i << " " << s << endl;
-		i = 8388608 + 2097152 + 32768 + 7;                 /* 2^23 + 2^21 + 2^15 + 7 */
-		s = i;                                             /* bude oriznuto, ale zmeni se kvuli tomu znamenko */
+		i = 8388608 + 2097152 + 32768 + 7;                 // 2^23 + 2^21 + 2^15 + 7   
+		s = i;                                             // bude oriznuto, ale zmeni se kvuli tomu znamenko   
 		cout << "        ... " << i << " " << s << endl;
     }
 	{
-		short s = -1;       /* binarne vypada s tak, ze vsechny bity jsou 1 */
-		int i = s;          /* byty ktere ma int navic oproti short se doplni jednickama
-		                       aby nedoslo k destrukci cisla, takze i jsou ted taky same bitove jednicky  */
+		short s = -1;       // binarne vypada s tak, ze vsechny bity jsou 1   
+		int i = s;          // byty ktere ma int navic oproti short se doplni jednickama
+		                    // aby nedoslo k destrukci cisla, takze i jsou ted taky same bitove jednicky    
 		cout << "test 04 ... " << s << " " << i << endl;					   
 	}
-	/*
+	/**
 	 * test 4 reprezentace float:
 	 * ==============================================================================
 	 * ||+/-| <------ 8b ------> | <-------------------- 23b --------------------> ||  
@@ -64,14 +64,14 @@ int main(int argc, char **argv) {
 	 /* test 5  */
 	 {
 		 int i = 37;
-		 float f = *(float *)&i;    /* prekopiruje bity nikoliv hodnotu */
+		 float f = *(float *)&i;    // prekopiruje bity nikoliv hodnotu   
 		 cout << "test 05 ... " << i << " " << f << endl;
 	 }
 	 /*  test 6  */
 	 {
 		 float f = 517.0;
-		 short s = *(short *)&f;   /* prekopiruje pouze bity z prvnich 2 bytu !  */
-		 cout << "test 06 ... " << f << " " << s << endl;  /* todo: proc je tam 0? */
+		 short s = *(short *)&f;   // prekopiruje pouze bity z prvnich 2 bytu !    
+		 cout << "test 06 ... " << f << " " << s << endl;  // todo: proc je tam 0?   
 	 }
     
 
