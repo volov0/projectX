@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
 		 float f = *(float *)&i;    /* prekopiruje bity nikoliv hodnotu */
 		 cout << "test 05 ... " << i << " " << f << endl;
 	 }
-	 /*  test 666666  */
+	 /*  test 6  */
 	 {
 		 float f = 517.0;
 		 short s = *(short *)&f;   /* prekopiruje pouze bity z prvnich 2 bytu !  */
