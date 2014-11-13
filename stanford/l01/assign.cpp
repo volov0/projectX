@@ -2,7 +2,7 @@
  * Stanford sample 
  *
  * Vaclav Koudelka
- * 06.11.2014 
+ * 06.11.2014  
  *  Sample prirazovani hodnot do promennych ruznych typu.
  */
 
