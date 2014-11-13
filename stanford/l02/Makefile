@@ -15,5 +15,5 @@ assign.o: assign.cpp
 		$(CC) $(CFLAGS) assign.cpp
 
 clean:
-		rm -rf *o hello
+		rm -rf *o assign 
         
