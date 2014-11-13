@@ -3,7 +3,7 @@
 #
 
 CC=g++
-CFLAGS=-c -Wall -ansi -pedantic-errors
+CFLAGS=-c -g -Wall -ansi -pedantic-errors
 
  
 all: assign

@@ -60,6 +60,7 @@ int main(int argc, char **argv) {
 	 {
 		 float f = 7;
 		 /* todo vyprintovat hexdec a binarne */
+		 cout << "test 04 ... " <<  f << endl;
 	 }
 	 /* test 5  */
 	 {
