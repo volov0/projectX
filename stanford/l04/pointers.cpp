@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
 	cout << "x = " << x << ", y = " << y << endl;
 
 	short s = 4;
-	swap(&x,&s, sizeof(short));   // noahodou funguje
+	swap(&x,&s, sizeof(int));   // noahodou funguje
 	cout << "x = " << x << ", s = " << s << endl;
 
 	return 0;
