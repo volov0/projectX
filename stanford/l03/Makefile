@@ -11,7 +11,7 @@ all: structs
 structs: structs.o
 		$(CC) structs.o -o structs
 
-structs.o: structs.cpp
+structs.o: structs.cpp ../headers/mydefs.h
 		$(CC) $(CFLAGS) structs.cpp
 
 clean:

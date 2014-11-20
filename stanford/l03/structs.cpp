@@ -6,13 +6,13 @@
  * Sample na pole, structy, atd.
  */
 
+#include "../headers/mydefs.h"
 #include <iostream>
 #include <iomanip>
 #include <string.h>
 #include <stdlib.h>
 
 #define FRACTION_PRINT(f) f.num << "/" << f.denum
-#define HEADER(t) "\n\n-------------------\n----  " << t << "  ----\n-------------------"
 
 using namespace std;
 
