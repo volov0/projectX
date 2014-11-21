@@ -4,7 +4,7 @@
 
 CC=g++
 #CFLAGS=-c -g -Wall -ansi -pedantic-errors
-CFLAGS=-c -g 
+CFLAGS=-c -g -DDEBUG=1 
 
  
 all: pointers
