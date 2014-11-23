@@ -1,8 +1,8 @@
 /**
- * Common header file with basic definitions.
- *
- * Vaclav Koudelka
- * 20.11.2014
+ * @file   mydefs.h
+ * @author Vaclav Koudelka
+ * @date   20.11.2014
+ * @brief  Common header file with basic definitions.
  *
  */
 
