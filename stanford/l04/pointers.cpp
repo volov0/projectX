@@ -195,7 +195,7 @@ int lsearch_int(int key, int array[], int size) {
  * Pro porovnani pouziva memcmp, takze neni vhodna pro struktury s pointrama
  * nebo stringy.
  */
-void * lsearch_mem(void *key, void *base, int n, int elem_size) { //, int (*cmpfnc(void *, void *)) {
+void * lsearch_mem(void *key, void *base, int n, int elem_size) { 
 	void *element_addr;
 
 	for (int i = 0; i < n; i++) {
