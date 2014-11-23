@@ -1,8 +1,9 @@
 /**
- * Stanford sample
+ * @file   structs.cpp
+ * @author Vaclav Koudelka
+ * @date   13.11.2014
+ * @brief  Stanford sample
  * 
- * Vaclav Koudelka
- * 13.11.2014
  * Sample na pole, structy, atd.
  */
 
@@ -22,7 +23,11 @@ struct fraction {
 };
 
 /**
- * Main function
+ * Function main
+ * -------------
+ * - test 01 todo
+ * - test 02 todo
+ * - test 02 todo
  */
 int main(int argc, char **argv) {
 	/* test 01 - struct */
