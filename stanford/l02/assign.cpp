@@ -1,8 +1,9 @@
-/** 
- * Stanford sample 
- *
- * Vaclav Koudelka
- * 06.11.2014  
+/**
+ * @file   assign.cpp
+ * @author Vaclav Koudelka
+ * @date   06.11.2014  
+ * @brief  Stanford sample 
+ * 
  *  Sample prirazovani hodnot do promennych ruznych typu.
  */
 
@@ -16,7 +17,15 @@
 using namespace std;
 
 /**
- * This is main function
+ * Function main
+ * -------------
+ * - test 01 - 's=c' priradi binarne... implicitni konverze char->short
+ * - test 02 - test 01, ale konverze naopak
+ * - test 03 - implicitni konverze int->short, dojde k orezavani bytu a zmene znaminka
+ * - test 04 - konverze short->int
+ * - test 05 - hexadecimalni vypis float
+ * - test 06 - prekopirovani bitu int(i=37) do float cisla + hexadecimalni vypis
+ * - test 07 - prekopirovani bitu float(f=517) do short cisla + hexadecomalni vypis obou
  */
 int main(int argc, char **argv) {
 	cout << "size of int:   " << sizeof(int) << endl << "size of short: " << sizeof(short) <<endl;
@@ -60,7 +69,7 @@ int main(int argc, char **argv) {
 		cout << " - two's complement." << endl;					   
 	}
 	/**
-	 * test 4 reprezentace float:
+	 * test 5 reprezentace float:
 	 * ==============================================================================
 	 * ||+/-| <------ 8b ------> | <-------------------- 23b --------------------> ||  
 	 * ==============================================================================
@@ -76,32 +85,33 @@ int main(int argc, char **argv) {
 		 float f = 7;
 		 char *c = (char *)&f;
 		 
+		 cout << HEADER("TEST 05") << endl;
 		 cout << "0x";
 		 for (int i = sizeof(float) - 1; i >= 0; i--)
 			cout << setw(2) << setfill('0') << hex << ((short)c[i] & 0xff);
 		 cout << "   float f = 7 - hex content of memory." << endl;
 
 	 }
-	 /* test 5  */
+	 /* test 6  */ 
 	 {
 		 int   i = 37;
 		 float f = *(float *)&i;    // prekopiruje bity nikoliv hodnotu   
 		 char *c = (char *)&f;
 
-		 cout << HEADER("TEST 05") << endl;
+		 cout << HEADER("TEST 06") << endl;
 		 cout << dec << i << " " << f << "   copying bits from int i=37 to float" << endl;
 		 cout << "0x";
 		 for (int i = sizeof(float) - 1; i >= 0; i--)
 			cout << setw(2) << setfill('0') << hex << ((short)c[i] & 0xff);
 		 cout << "      resulting float is dumped." << endl;
 	 }
-	 /*  test 6  */
+	 /*  test 7  */
 	 {
 		 float f = 517.0;
 		 short s = *(short *)&f;   // prekopiruje pouze bity z prvnich 2 bytu !    
 		 char *c = (char *)&f;
 
-		 cout << HEADER("TEST 06") << endl;
+		 cout << HEADER("TEST 07") << endl;
 		 cout << dec << f << " " << s << "       copying bits from float f=517 to short => two bytes are discarded." << endl;     
 		 cout << "0x";
 		 for (int i = sizeof(float) - 1; i >= 0; i--)
