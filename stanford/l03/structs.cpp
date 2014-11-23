@@ -25,9 +25,9 @@ struct fraction {
 /**
  * Function main
  * -------------
- * - test 01 todo
- * - test 02 todo
- * - test 02 todo
+ * - test 01 - struktury a konverze pointeru
+ * - test 02 - pointery a pole
+ * - test 03 - struktury a pointery + strdup, strcpy + heap a stack
  */
 int main(int argc, char **argv) {
 	/* test 01 - struct */
@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
 	students pupils[4];                   //tohle bydli v zasobniku (stacku)
 	pupils[0].numUnits = 21;
 	pupils[2].name = strdup("Pepa");      //strdup - STRing DUPlicate - alokuje misto, kopiruje tam obsah paramteru a vrati adresu
-	                                      //  ...Pepa bydli na stacku
+	                                      //  ...Pepa bydli na heapu
 	pupils[3].name = pupils[0].suid + 6;  //prasarna
 	strcpy(pupils[1].suid,"90210xx");     //strcpy - STRing CoPY - narozdil od strdup NEalokuje pamet
 	strcpy(pupils[3].name,"123456");      //ve skutecnosti zapisuje do pupils[0].suid+6 a prepisuje i pupils[0].numUnit a dokonce pupils[1].name
