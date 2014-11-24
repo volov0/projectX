@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
 
 	int arr[10] = {78, 47, 32, 40, 7, 55, 96, 1, 72, 20 };
 	int *pk;
-	int key = 55;
+	int key = 96;
 	pk = lsearch(&key, arr, 10, sizeof(int), compare_int);
 	printf("position of %d in array id %lu \n", key, pk - arr);
 	printf("arr:  %lx\n", (long)arr); 
@@ -61,7 +61,7 @@ void *lsearch(void *key, void *base, int n, int elem_size, int (*cmpfn)(void *, 
 		 *    kompilatoru... ten totiz nemuze vedet jak... opet je to problem C
 		 */
 		void *element_addr = (char *)base + i*elem_size;
-		if (cmpfn(key,element_addr) == 0) {
+		if (cmpfn(key,element_addr) != 0) {
 			return element_addr;
 		}
 	}
