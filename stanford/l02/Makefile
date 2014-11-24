@@ -11,7 +11,7 @@ all: assign
 assign: assign.o
 		$(CC) assign.o -o assign
 
-assign.o: assign.cpp ../headers/mydefs.h
+assign.o: assign.cpp ../headers/mydefs.hpp
 		$(CC) $(CFLAGS) assign.cpp
 
 clean:

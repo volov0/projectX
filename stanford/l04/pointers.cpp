@@ -7,7 +7,7 @@
  * Sample na pole, funkce...
  */
 
-#include "../headers/mydefs.h"
+#include "../headers/mydefs.hpp"
 #include <iostream>
 #include <iomanip>
 #include <string.h>
@@ -19,7 +19,6 @@ void swap(void *vp1, void *vp2, int size);
 void swap_my(void *vp1, void *vp2, int size);
 int  lsearch_int(int key, int array[], int size);
 void *lsearch_mem(void *key, void *base, int n, int elem_size);
-void *lsearch(void *key, void *base, int n, int elem_size, int (*cmpfn(void *, void *))); 
 
 /**
  * Function main
@@ -96,13 +95,11 @@ int main(int argc, char **argv) {
 	cout << "position of 13 in array is " << kk << endl;
 	
 	int *pk;
-	int key = 47;
+	int key = 47;   // musim vytvorit promennou, protoze budu predavat jako &key
 	pk = (int *)lsearch_mem(&key, arr, 10, sizeof(int));
 	cout << "position of 47 in array is " << pk - arr << endl;
 	cout << "arr: " << arr << endl;
 	cout << "pk:  " << pk  << endl;
-
-	
 
 	return 0;
 }
@@ -196,8 +193,6 @@ int lsearch_int(int key, int array[], int size) {
  * nebo stringy.
  */
 void * lsearch_mem(void *key, void *base, int n, int elem_size) { 
-	void *element_addr;
-
 	for (int i = 0; i < n; i++) {
 		/* poznamka k nasledujicimu prirazeni:
 		 *  - i*elem_size je offset od zacatku pole
@@ -208,7 +203,7 @@ void * lsearch_mem(void *key, void *base, int n, int elem_size) {
 		 *  - v podstate delam pointerovou aritmetiku brutalni silou na misto
 		 *    kompilatoru... ten totiz nemuze vedet jak... opet je to problem C
 		 */
-		element_addr = (char *)base + i*elem_size;
+		void *element_addr = (char *)base + i*elem_size;
 		if (memcmp(key,element_addr,elem_size) == 0) {
 			return element_addr;
 		}
@@ -216,34 +211,3 @@ void * lsearch_mem(void *key, void *base, int n, int elem_size) {
 	return NULL;
 }
 
-/**
- * Function lsearch
- * --------------------
- * Genericka funkce pro prohledavani pole, ktere obsahuje jakekoliv veci.
- * @return adresa na prvek v poli, ktery odpovida klici
- * @param1 key klic toho, co se hleda v poli
- * @param2 base adresa zacatku pole
- * @param3 n pocet prvku v poli
- * @param4 elem_size velikost jednoho prvku
- * @param5 cmpfn funkce pro porovnani dvou prvku
- */
-void * lsearch(void *key, void *base, int n, int elem_size, int (*cmpfn(void *, void *))) {
-	void *element_addr;
-
-	for (int i = 0; i < n; i++) {
-		/* poznamka k nasledujicimu prirazeni:
-		 *  - i*elem_size je offset od zacatku pole
-		 *  - (char *)base - tady musi byt pretypovani na (char *) protoze,
-		 *    ANSI C nedovluje aritmetiku s typem (void*), takze pretypovani
-		 *    na (char *) nic nezmeni jen kompilator nebude hazet warningy
-		 *    je to hack, ale bezne se pouziva
-		 *  - v podstate delam pointerovou aritmetiku brutalni silou na misto
-		 *    kompilatoru... ten totiz nemuze vedet jak... opet je to problem C
-		 */
-		element_addr = (char *)base + i*elem_size;
-		if (memcmp(key,element_addr,elem_size) == 0) {
-			return element_addr;
-		}
-	}
-	return NULL;
-}

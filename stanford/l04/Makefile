@@ -12,7 +12,7 @@ all: pointers
 pointers: pointers.o
 		$(CC) pointers.o -o pointers
 
-pointers.o: pointers.cpp ../headers/mydefs.h
+pointers.o: pointers.cpp ../headers/mydefs.hpp
 		$(CC) $(CFLAGS) pointers.cpp
 
 clean:

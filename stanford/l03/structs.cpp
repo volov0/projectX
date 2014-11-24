@@ -7,7 +7,7 @@
  * Sample na pole, structy, atd.
  */
 
-#include "../headers/mydefs.h"
+#include "../headers/mydefs.hpp"
 #include <iostream>
 #include <iomanip>
 #include <string.h>
