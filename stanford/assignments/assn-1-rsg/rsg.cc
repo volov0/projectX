@@ -9,6 +9,7 @@
  
 #include <map>
 #include <fstream>
+#include <cassert>
 #include "definition.h"
 #include "production.h"
 using namespace std;
@@ -75,5 +76,15 @@ int main(int argc, char *argv[])
   cout << "The grammar file called \"" << argv[1] << "\" contains "
        << grammar.size() << " definitions." << endl;
   
+  // search in the deep...
+  //assert(grammar["<startt>"] != NULL);
+  Production gen_prod;
+  gen_prod = grammar["<start>"].getRandomProduction();
+  string s;
+  for (std::vector<string>::iterator it = gen_prod.begin(); it != gen_prod.end(); ++it) {
+	  cout << *it << " " ;
+  }
+  cout << endl;
+
   return 0;
 }
