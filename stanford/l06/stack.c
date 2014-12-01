@@ -12,10 +12,12 @@
 /**
  * Function main
  * -------------
- * - test 01 - ineteger stackstack veci
+ * - test 01 - ineteger stack 
+ * - test 02 - genericky stack
  */
 int main(int argc, char *argv[]) {
 	/* test 01 - int stack */
+	printf("  --- TEST 01 ---\n");
 	int_stack is;
 	int_stack_new(&is);
 	int i;
@@ -30,6 +32,7 @@ int main(int argc, char *argv[]) {
 	int_stack_dispose(&is);
 
 	/* test 02 - generic stack */
+	printf("  --- TEST 02 ---\n");
 
 	return 0;
 }

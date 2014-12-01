@@ -18,7 +18,8 @@
  * Genericky zasobnik.
  */
 typedef struct {
-	int *elem;
+	void **elem;
+	int elem_size;
 	int logical_length;
 	int allocated_length;
 } stack;
@@ -27,9 +28,10 @@ typedef struct {
  * Function stack_new
  * ------------------
  * @param s - stack address
+ * @param elem_size - velikost jednoho prvku
  * Inicializuje stack, alokuje pamet pro STACK_INT_SIZE prvku.
  */
-void stack_new(stack *s);
+void stack_new(stack *s, int elem_size);
 
 /**
  * Function stack_dispose
