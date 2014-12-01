@@ -41,6 +41,27 @@ static void readGrammar(ifstream& infile, map<string, Definition>& grammar)
 }
 
 /**
+ * Function process_nonterminal
+ * ----------------------------
+ * Recursive sentence generation
+ *
+ * @param nont - nonterminal string to be processed
+ * @param grammar reference to STL map which defines grammar 
+ */
+void process_nonterminal(string nont, map<string, Definition>& grammar) {
+	Production prod = grammar[nont].getRandomProduction();
+	for (std::vector<string>::iterator it = prod.begin(); it != prod.end(); ++it) {
+		string s = *it;
+		if ((s[0] != '<') || (s[s.size()-1] != '>')) {
+			cout << s << " ";
+		}
+		else {
+    		process_nonterminal(s,grammar);
+		}
+	}
+}
+
+/**
  * Performs the rudimentary error checking needed to confirm that
  * the client provided a grammar file.  It then continues to
  * open the file, read the grammar into a map<string, Definition>,
@@ -77,13 +98,13 @@ int main(int argc, char *argv[])
        << grammar.size() << " definitions." << endl;
   
   // search in the deep...
-  //assert(grammar["<startt>"] != NULL);
-  Production gen_prod;
-  gen_prod = grammar["<start>"].getRandomProduction();
-  string s;
-  for (std::vector<string>::iterator it = gen_prod.begin(); it != gen_prod.end(); ++it) {
-	  cout << *it << " " ;
-  }
+  //assert(grammar.at("<startt>") == NULL);
+  //Definition def = grammar["aaaaa"];
+  process_nonterminal("<start>", grammar);
+  cout << endl;
+  process_nonterminal("<start>", grammar);
+  cout << endl;
+  process_nonterminal("<start>", grammar);
   cout << endl;
 
   return 0;
