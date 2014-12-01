@@ -29,7 +29,7 @@ typedef struct {
  * @param s - stack address
  * Inicializuje stack, alokuje pamet pro STACK_INT_SIZE prvku.
  */
-void int_stack_new(stack *s);
+void int_stack_new(int_stack *s);
 
 /**
  * Function int_stack_dispose
@@ -37,7 +37,7 @@ void int_stack_new(stack *s);
  * @param s - stack address
  * Zrusi stack, odalokuje pamet.
  */
-void int_stack_dispose(stack *s);
+void int_stack_dispose(int_stack *s);
 
 /**
  * Function int_stack_push
@@ -46,7 +46,7 @@ void int_stack_dispose(stack *s);
  * @param value - novy prvek
  * Vlozi int do stacku, pokud je potreba, tak prialokuje pamet.
  */
-void int_stack_push(stack *s, int value);
+void int_stack_push(int_stack *s, int value);
 
 /**
  * Function int_stack_pop
@@ -54,7 +54,7 @@ void int_stack_push(stack *s, int value);
  * @param s - stack address
  * Vybere prvek ze zasobniku a vrati ho.
  */
-int int_stack_pop(stack *s);
+int int_stack_pop(int_stack *s);
 
 /**
  * Function int_stack_print
@@ -62,7 +62,7 @@ int int_stack_pop(stack *s);
  * @param s - stack address
  * Vytiskne obsah zasobniku na obrazovku.
  */
-void int_stack_print(stack *s, int value);
+void int_stack_print(int_stack *s);
 
 
 #endif  /* INT_STACK_H */

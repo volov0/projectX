@@ -7,23 +7,38 @@
 
 #include "int_stack.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
 
-void int_stack_new(stack *s) {
+void int_stack_new(int_stack *s) {
+	s->elem = (int *)malloc(STACK_INIT_SIZE*sizeof(int));
+	assert(s->elem);
+	s->logical_length = 0;
+	s->allocated_length = STACK_INIT_SIZE;
 }
 
-void int_stack_dispose(stack *s) {
+void int_stack_dispose(int_stack *s) {
+	free(s->elem);
+	s->logical_length = 0;
+	s->allocated_length = 0;
 }
 
-void int_stack_push(stack *s, int value) {
-
+void int_stack_push(int_stack *s, int value) {
+	if (s->logical_length == s->allocated_length) {
+		s->allocated_length *= 2;
+		s->elem = (int *)realloc(s->elem, s->allocated_length*sizeof(int));
+		assert(s->elem);
+	}
+	s->elem[s->logical_length++] = value;
 }
 
-int int_stack_pop(stack *s) {
-	return s->elem[s->logical_lentgh--];
+int int_stack_pop(int_stack *s) {
+	return s->elem[s->logical_length--];
 }
 
-void int_stack_print(stack *s, int value) {
-	for (int i = 0; i < s->logical_length; i++) {
+void int_stack_print(int_stack *s) {
+	int i;
+	for (i = 0; i < s->logical_length; i++) {
 		printf("%d ", s->elem[i]);
 	}
 	printf("\n");
