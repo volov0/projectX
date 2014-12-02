@@ -12,9 +12,9 @@
 
 void int_stack_new(int_stack *s) {
 	s->elem = (int *)malloc(STACK_INIT_SIZE*sizeof(int));
-	assert(s->elem);
 	s->logical_length = 0;
 	s->allocated_length = STACK_INIT_SIZE;
+	assert(s->elem != NULL);
 }
 
 void int_stack_dispose(int_stack *s) {
@@ -27,7 +27,7 @@ void int_stack_push(int_stack *s, int value) {
 	if (s->logical_length == s->allocated_length) {
 		s->allocated_length *= 2;
 		s->elem = (int *)realloc(s->elem, s->allocated_length*sizeof(int));
-		assert(s->elem);
+		assert(s->elem != NULL);
 	}
 	s->elem[s->logical_length++] = value;
 }
