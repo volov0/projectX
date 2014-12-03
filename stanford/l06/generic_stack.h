@@ -19,9 +19,10 @@
  */
 typedef struct {
 	void **elem;
-	int elem_size;
-	int logical_length;
-	int allocated_length;
+	int  elem_size;
+	int  logical_length;
+	int  allocated_length;
+	void (*cpyfn)(void *, void *);
 } stack;
 
 /**
@@ -31,7 +32,7 @@ typedef struct {
  * @param elem_size - velikost jednoho prvku
  * Inicializuje stack, alokuje pamet pro STACK_INT_SIZE prvku.
  */
-void stack_new(stack *s, int elem_size);
+void stack_new(stack *s, int elem_size, void (*cpyfn)(void *, void *));
 
 /**
  * Function stack_dispose
