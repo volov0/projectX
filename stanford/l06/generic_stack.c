@@ -10,11 +10,11 @@
 #include <assert.h>
 
 void stack_new(stack *s, int elem_size) {
-	s->elem = malloc(STACK_INIT_SIZE * elem_size);
-	assert(s->elem);
 	s->elem_size = elem_size;
 	s->logical_length = 0;
 	s->allocated_length = STACK_INIT_SIZE;
+	s->elem = malloc(STACK_INIT_SIZE * elem_size);
+	assert(s->elem);
 }
 
 void stack_dispose(stack *s) {
