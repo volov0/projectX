@@ -31,8 +31,24 @@ int main(int argc, char *argv[]) {
 	int_stack_print(&is);
 	int_stack_dispose(&is);
 
-	/* test 02 - generic stack */
+	/* test 02 - generic stack with ints */
 	printf("  --- TEST 02 ---\n");
+	int *pi;
+	stack st;
+	stack_new(&st, sizeof(int));
+	for (i = 0; i < 15; i++) {
+		stack_push(&st, &i);
+	}
+	
+	for (i = 0; i < 15; i++) {
+		pi = stack_pop(&st);
+		printf("%d ", *pi);
+	}
+	stack_dispose(&st);
+
+	/* test 02 - generic stack with ints */
+
+
 
 	return 0;
 }
