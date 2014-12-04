@@ -16,6 +16,9 @@
  * Type int_struct
  * ---------------
  * Zasobnik, ktery podporuje pouze inty.
+ * V C++ lze rict, ze nasledujici veco jsou privat a nikdo krome
+ * metod na ne nesmi sahat. V C to nejde. Sahat na ne muze kdokoliv
+ * ale pouzivat by se mely jen funkce pro manipulaci.
  */
 typedef struct {
 	int *elem;

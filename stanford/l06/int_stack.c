@@ -11,9 +11,9 @@
 #include <assert.h>
 
 void int_stack_new(int_stack *s) {
-	s->elem = (int *)malloc(STACK_INIT_SIZE*sizeof(int));
 	s->logical_length = 0;
 	s->allocated_length = STACK_INIT_SIZE;
+	s->elem = (int *)malloc(STACK_INIT_SIZE*sizeof(int));
 	assert(s->elem != NULL);
 }
 
@@ -29,11 +29,14 @@ void int_stack_push(int_stack *s, int value) {
 		s->elem = (int *)realloc(s->elem, s->allocated_length*sizeof(int));
 		assert(s->elem != NULL);
 	}
-	s->elem[s->logical_length++] = value;
+	s->elem[s->logical_length] = value;
+	s->logical_length++;
 }
 
 int int_stack_pop(int_stack *s) {
-	return s->elem[s->logical_length--];
+	assert(s->logical_length > 0);
+	s->logical_length--;
+	return s->elem[s->logical_length];
 }
 
 void int_stack_print(int_stack *s) {

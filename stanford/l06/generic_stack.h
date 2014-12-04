@@ -18,11 +18,11 @@
  * Genericky zasobnik.
  */
 typedef struct {
-	void **elem;
+	void *elem;
 	int  elem_size;
 	int  logical_length;
 	int  allocated_length;
-	void (*cpyfn)(void *, void *);
+	void (*freefn)(void *);
 } stack;
 
 /**
@@ -30,9 +30,10 @@ typedef struct {
  * ------------------
  * @param s - stack address
  * @param elem_size - velikost jednoho prvku
+ * @param freefn - funkce k uvolneni pameti pro elementy, muze byt NULL
  * Inicializuje stack, alokuje pamet pro STACK_INT_SIZE prvku.
  */
-void stack_new(stack *s, int elem_size, void (*cpyfn)(void *, void *));
+void stack_new(stack *s, int elem_size, void (*freefn)(void *));
 
 /**
  * Function stack_dispose
@@ -46,18 +47,19 @@ void stack_dispose(stack *s);
  * Function stack_push
  * -------------------
  * @param s - stack address
- * @param value - novy prvek
+ * @elem_addr - novy prvek
  * Vlozi int do stacku, pokud je potreba, tak prialokuje pamet.
  */
-void stack_push(stack *s, void *value);
+void stack_push(stack *s, void *elem_addr);
 
 /**
  * Function stack_pop
  * ------------------
  * @param s - stack address
+ * @elem_addr - adresa prvku, kde se vrati vrchol zasobniku
  * Vybere prvek ze zasobniku a vrati ho.
  */
-void *stack_pop(stack *s);
+void stack_pop(stack *s, void *elem_addr);
 
 
 #endif  /* STACK_H */
