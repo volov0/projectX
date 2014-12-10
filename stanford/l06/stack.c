@@ -8,8 +8,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <stdlib.h>
 #include "int_stack.h"
 #include "generic_stack.h"
+
+void string_free(void *p) {
+	free(*(char **)p);
+}
 
 /**
  * Function main
@@ -53,7 +58,7 @@ int main(int argc, char *argv[]) {
 	printf("  --- TEST 03 ---\n");
 	const char *strs[] = {"aaaaaaa", "bbbbbb", "cc"};
 	char * scopy;
-	stack_new(&st, sizeof(char *), NULL);
+	stack_new(&st, sizeof(char *), string_free);
 
 	for (i = 0; i < 3; i++) {
 		scopy = strdup(strs[i]);
@@ -64,10 +69,11 @@ int main(int argc, char *argv[]) {
 	for (i = 0; i < 3; i++) {
 		stack_pop(&st, &pc);
 		printf("%s ", pc);
+		free(pc);
 	}
 	printf("\n");
 
-
+	stack_dispose(&st);
 
 	return 0;
 }

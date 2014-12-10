@@ -30,8 +30,9 @@ typedef struct {
  * ------------------
  * @param s - stack address
  * @param elem_size - velikost jednoho prvku
- * @param freefn - funkce k uvolneni pameti pro elementy, muze byt NULL
- * Inicializuje stack, alokuje pamet pro STACK_INT_SIZE prvku.
+ * @param freefn - funkce k uvolneni pameti pro elementy, muze byt NULL,
+ *   pouzije se pri stack_dispose k uvolneni zbylych elementu  
+ * @detail Inicializuje stack, alokuje pamet pro STACK_INT_SIZE prvku.
  */
 void stack_new(stack *s, int elem_size, void (*freefn)(void *));
 
@@ -39,7 +40,7 @@ void stack_new(stack *s, int elem_size, void (*freefn)(void *));
  * Function stack_dispose
  * ----------------------
  * @param s - stack address
- * Zrusi stack, odalokuje pamet.
+ * @detail Zrusi stack, odalokuje pamet.
  */
 void stack_dispose(stack *s);
 
@@ -48,7 +49,7 @@ void stack_dispose(stack *s);
  * -------------------
  * @param s - stack address
  * @elem_addr - novy prvek
- * Vlozi int do stacku, pokud je potreba, tak prialokuje pamet.
+ * @detail Vlozi int do stacku, pokud je potreba, tak prialokuje pamet.
  */
 void stack_push(stack *s, void *elem_addr);
 
@@ -57,7 +58,7 @@ void stack_push(stack *s, void *elem_addr);
  * ------------------
  * @param s - stack address
  * @elem_addr - adresa prvku, kde se vrati vrchol zasobniku
- * Vybere prvek ze zasobniku a vrati ho.
+ * @detail Vybere prvek ze zasobniku a vrati ho.
  */
 void stack_pop(stack *s, void *elem_addr);
 

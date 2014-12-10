@@ -26,8 +26,12 @@ void stack_new(stack *s, int elem_size, void (*freefn)(void *)) {
 }
 
 void stack_dispose(stack *s) {
-	/* todo
-	 * uvolnit jednotlive elementy */
+	if (s->freefn != NULL) {
+		for ( ; s->logical_length > 0; --s->logical_length) {
+			s->freefn(((char *)s->elem) + (s->elem_size * s->logical_length));
+		}
+	}
+
 	free(s->elem);
 }
 
