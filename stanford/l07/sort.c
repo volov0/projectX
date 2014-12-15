@@ -25,13 +25,14 @@ int main(int argc, char *argv[]) {
 	int i;
 
 	printf("  --- TEST 01 ---\n");
+	printf("%x %x", (int)arr, (int)(&arr));
 	for (i = 0; i < 10; i++) {
 		arr[i] = random() % 100;
 		printf("%d ", arr[i]);
 	}
 	printf("\n");
 
-	qsort(&arr, 10, sizeof(int), int_cmp);
+	mqsort(&arr, 10, sizeof(int), int_cmp);
 
 	for (i = 0; i < 10; i++) {
 		printf("%d ", arr[i]);
