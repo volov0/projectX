@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "qsort.h"
+#include "rotate.h"
 
 int int_cmp(void *a, void *b) {
 	int *ia = (int *)a;
@@ -25,19 +26,29 @@ int main(int argc, char *argv[]) {
 	int i;
 
 	printf("  --- TEST 01 ---\n");
-	printf("%x %x", (int)arr, (int)(&arr));
 	for (i = 0; i < 10; i++) {
 		arr[i] = random() % 100;
 		printf("%d ", arr[i]);
 	}
 	printf("\n");
 
-	mqsort(&arr, 10, sizeof(int), int_cmp);
+	mqsort(arr, 10, sizeof(int), int_cmp);
 
 	for (i = 0; i < 10; i++) {
 		printf("%d ", arr[i]);
 	}
 	printf("\n");
+
+	/* test 02 - rotate */
+	printf("  --- TEST 02 ---\n");
+
+	rotate(arr, arr + 4, arr + 10); 
+
+	for (i = 0; i < 10; i++) {
+		printf("%d ", arr[i]);
+	}
+	printf("\n");
+
 
 	return 0;
 }
