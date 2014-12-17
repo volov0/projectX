@@ -11,12 +11,13 @@
  * -------------
  * - test 01 - 
  */
-int main(int argc, char *argv[]) {
+//int main(int argc, char *argv[]) {
+int main(void) {
 	int i;
 	int j;
 
 	i = 10;
 	j = i + 7;
 	j++;
-	return 0;
+	return 2;
 }
