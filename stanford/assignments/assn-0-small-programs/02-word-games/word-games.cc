@@ -13,10 +13,11 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <stdlib.h>
 using namespace std;
 
 static void loadWords(vector<string>& words,
-		      const char *wordsFile = "/usr/class/cs107/assignments/assn-0-small-programs-data/words.txt");
+		      const char *wordsFile = "/home/aaa/projectX/stanford/assignments/assn-0-small-programs-data/words.txt");
 static void playWordGames(const vector<string>& words);
 static bool isLegitimateResponse(const string& response);
 static void listWordsContaining(const vector<string>& words, const string& letters);

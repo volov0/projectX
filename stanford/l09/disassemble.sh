@@ -1,0 +1,1 @@
+objdump -S --disassemble simple
