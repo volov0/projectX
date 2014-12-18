@@ -6,6 +6,10 @@
  */
 
 
+int fxn(int a);
+int gxn(int b, int c, int d);
+
+ 
 /**
  * Function main
  * -------------
@@ -15,9 +19,38 @@
 int main(void) {
 	int i;
 	int j;
+	int k;
 
 	i = 10;
 	j = i + 7;
-	j++;
-	return 2;
+	k = fxn(j);
+	k++;
+	return k;
+}
+
+/**
+ * Function fxn
+ * ------------
+ * uplne jednoducha funkce na demonstraci stacku
+ */
+int fxn(int a) {
+	int x;
+	x = a + 9;
+	x = gxn(x,4,2);
+	return x;
+}
+
+/**
+ * Function gxn
+ * ------------
+ * uplne jednoducha funkce na demonstraci stacku
+ */
+int gxn(int b, int c, int d) {
+	int arr[4];
+	int i;
+	for (i = 0; i < 4; i++) {
+		arr[i] = c;
+	}
+	i = i + d + b + arr[3];
+	return i;
 }

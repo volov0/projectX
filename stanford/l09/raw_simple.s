@@ -2,49 +2,73 @@
  * @file raw_simple.s
  * @author volovo
  * @date 17.12.2014
- * @brief jednoduchy assemler program
+ * @brief jednoduchy assemler program AT&T syntax
  * @detail dela to naseldujici:
- *   int i, j;
+ *   int i, j, k;
  *   i = 10;
  *   j = i + 7;
  *   j++;
- *   return 3;
+ *   k = fxn(j);
+ *   return k;
+ *
+ * int fxn(int a) { int x = a + 9; return a; }
+ *
  * -------------------------------------
  * Poznamky:
  *  %eax - je 4bytovy general purpose register - AX register je na 16bitovych masinach
  *         extended AX (EAX) je na 32bitovych masinach
  *         na 64bitove masine jsou pointery rax, rbx, ...
- *  dalsi "normalni" 32bitove registry jsou: eax, ebx, ecx, edx, ebp, edi, esi 
+ *  dalsi "normalni" 32bitove registry jsou: eax, ebx, ecx, edx,  edi, esi 
  *         - jejich dolni 16bitova cast jsou ax, bx, cx, dx
  *         - jejich dolni 8bitova cast jsou al, bl, cl, dl 
  *         - horni byte 16bitove casti jsou registry ah, bh, ch, dh
  *  stack pointer - register esp (pro 32bitu), rsp (pro 64bitu), sp (16bitu)
- *  instruction pointer - eip (32b), rip(64b), ip(16b)
- *  base pointer - todo
+ *                - instrukce pop, push implicitne meni esp(rsp), push dekrementuje esp
+ *                  pop inkrementuje esp, prefix pop/push instrukce urcuje o kolik se 
+ *                  de/inkrementuje (pushq - o 64bitu) 
+ *  instruction pointer - eip (32b), rip(64b), ip(16b) - nelze ho menit, meni ho procesor
+ *  base pointer - ebp(rbp) - je neco jako bazovy register, pri behu subrutiny obsahuje 
+ *                 adresu vrcholu stacku v dobe kdy subrutina zacala. Tudiz tam jsou vsechny 
+ *                 parametry a lokalni promenne, ktere jsou vzdy na konstantnim offsetu od ebp.
+ *               - Na zacatku subrutiny se na stack vlozi stara hodnota ebp, aby se mohla   
+ *                 obnovit pri navratu ze subrutiny.
+ *  delka instrukci v x86 je variabilni... 1-15 bytu
  */
 	.file	"raw_simple.s"
 	.text
-	.globl	main
-	.type	main, @function	
+	.globl	main                  # glogbl direktiva dela symbol "main" viditelny pro ld (linker)
+	.type	main, @function       # definuje typ symbolu "main" jako function
 main:
-.LFB0:
-	.cfi_startproc
-	pushq	%rbp
-	.cfi_def_cfa_offset 16
-	.cfi_offset 6, -16
-	movq	%rsp, %rbp
-	.cfi_def_cfa_register 6
-	movl	$10, -4(%rbp)         # do adresy na stack-4 ulozi 10 
-	movl	-4(%rbp), %eax        # fullword z teto adresy na stacku ulozi do eax
+	pushq	%rbp                  # uloz starou hodnotu base pointeru na stack
+	movq	%rsp, %rbp            # nastav novou hodnotu base pointeru na soucasny vrchol stacku
+	subq    $16,%rsp              # alokuj misto na stacku pro lokalni promenne
+	movl	$10, -4(%rbp)         # do adresy na stack-4(int i) ulozi 10
+	movl	-4(%rbp), %eax        # 4byty z teto adresy na stacku ulozi do eax
 	addl	$7, %eax              # eax incrementuje o 7
-	movl	%eax, -8(%rbp)        # fullword z eax ulozi na stack-8
-	addl	$1, -8(%rbp)          # fullwor na stack-8 inkrementuje o 1
-	movl	$3, %eax              # do eax ulozi hodnotu 3
-	popq	%rbp
-	.cfi_def_cfa 7, 8
-	ret
-	.cfi_endproc
-.LFE0:
-	.size	main, .-main
-	.ident	"GCC: (Debian 4.7.2-5) 4.7.2"
-	.section	.note.GNU-stack,"",@progbits
+	movl	%eax, -8(%rbp)        # 4byty z eax ulozi na stack-8(int j)
+	addl	$1, -8(%rbp)          # 4bytovy int na stack-8(int j) inkrementuje o 1 - instrukce memory to memory (znak CISC architektury - ARM to treba nema)
+	movl	-8(%rbp), %eax        # 4bytovy int na stack-8(int j) uloz do eax
+	movl	%eax, %edi     	      # eax uloz do edi, coz je parametr
+	call	fxn            	      # volej fxn() - na stack ulozi aktualni pozici v kodu(eip/rip)
+	movl	%eax, -12(%rbp)       # uloz navratovou hodnotu z fxn() na stack-12(int k)	
+	movl	-12(%rbp), %eax	      # uloz hodnotu ze stack-12(int k) do eax (return value)
+	leave                         # leave instrukce kopiruje base pointer(ebp) do stack pointeru(esp) = inkrementace stack pointeru
+	ret                           # vrat kontrolu volajici procedure (v tomto pripade OS) - adresa je na stacku
+	.size	main, .-main          # velikost asociovana se symbolem "main"
+	.globl	fxn
+	.type	fxn, @function	
+fxn:                       	
+	pushq	%rbp                  # uloz starou hodnotu base pointeru na stack
+	movq	%rsp, %rbp            # nastav novou hodnotu base pointeru na soucasny vrchol stacku
+/* tady by mela byt alokace mista pro lokalni promennou -4(%rbp), 
+ * ale kompilator to neudelal... (asi protoze se odtud nevola zadna dalsi funkce) */
+	movl	%edi, -20(%rbp)       # uloz hodnotu %edi na stack-20
+	movl	-20(%rbp), %eax       # do eax uloz hodnotu parametru
+	addl	$9, %eax              # k eax pricti 9
+	movl	%eax, -4(%rbp)        # vysledek uloz na stack-4(int x)
+	movl	-4(%rbp), %eax        # uloz hodnotu ze stack-4(int x) do eax (return value)
+	popq	%rbp                  # obnov base pointeru - je na vrcholu stacku
+	ret                           # vrat kontrolu volajici procedure (main) - kam skocit se zjisti ze stacku
+	.size	fxn, .-fxn            # velikost asociovana se symbolem fxn
+	.ident	"GCC: (Debian 4.7.2-5) 4.7.2"     # GCC si to sem dalo samo pri dekodovani, neni nutne
+	.section	.note.GNU-stack,"",@progbits  # ???
