@@ -8,6 +8,7 @@
  */
 
 #include <iostream>
+#include <vector>
 #include "tsearch.hpp"
 
 using namespace std;
@@ -21,7 +22,13 @@ using namespace std;
 int main(int argc, char **argv) {
 	/* test 1 -   */
 	cout << " --- TEST 01 --- " << endl;
-	int arr[10] = {78, 47, 32, 40, 7, 55, 96, 1, 72, 20 };
+
+	vector<int> numbers;
+	int p;
+	numbers.push_back(78); numbers.push_back(47); numbers.push_back(32); numbers.push_back(40);
+	numbers.push_back(7); numbers.push_back(55); numbers.push_back(96); numbers.push_back(13);
+	p = tsearch(55, numbers);
+	cout << "Position of 55 in numbers is " << p << endl;
 
  	return 0;
 }
