@@ -27,6 +27,7 @@
  *                  pop inkrementuje esp, prefix pop/push instrukce urcuje o kolik se 
  *                  de/inkrementuje (pushq - o 64bitu) 
  *  instruction pointer - eip (32b), rip(64b), ip(16b) - nelze ho menit, meni ho procesor
+ *                      - dokonce ani nemuze v mov instrukci 
  *  base pointer - ebp(rbp) - je neco jako bazovy register, pri behu subrutiny obsahuje 
  *                 adresu vrcholu stacku v dobe kdy subrutina zacala. Tudiz tam jsou vsechny 
  *                 parametry a lokalni promenne, ktere jsou vzdy na konstantnim offsetu od ebp.
