@@ -10,6 +10,7 @@
 #define TSEARCH_HPP
 
 #include <vector>
+using namespace std;
 
 /**
  * Template function tsearch
@@ -19,6 +20,13 @@
  * @return pozice klice key v poli nebo -1 kdyz nenalezeno 
  */
 template <class T>
-int tsearch(T key, std::vector<T>& v);
+int tsearch(T key, vector<T>& v) {
+	for (int i = 0; i < (int)v.size(); i++) {
+		if (key == v[i]) {
+			return i;
+		}
+	}
+	return -1;
+}
 
 #endif  /* TSEARCH_HPP */

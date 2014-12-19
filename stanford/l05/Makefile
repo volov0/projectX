@@ -15,14 +15,11 @@ generic_search: generic_search.o
 generic_search.o: generic_search.c 
 		$(CC) $(CFLAGS) generic_search.c
 
-cpp_search: cpp_search.o tsearch.o
+cpp_search: cpp_search.o 
 		$(CPP) cpp_search.o -o cpp_search
 
-cpp_search.o: cpp_search.cpp 
+cpp_search.o: cpp_search.cpp tsearch.hpp 
 		$(CPP) $(CFLAGS) cpp_search.cpp
-
-tsearch.o: tsearch.cpp tsearch.hpp
-		$(CPP) $(CFLAGS) tsearch.cpp
 
 clean:
 		rm -rf *o generic_search cpp_search
