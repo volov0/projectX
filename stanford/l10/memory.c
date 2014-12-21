@@ -8,6 +8,23 @@
 #include <stdio.h>
 #include "dump.h"
 
+/**
+ * Function factorial
+ * ------------------
+ * @brief faktorial
+ */
+int factorial(int n) {
+	int i;
+	dump_stack(5);
+	if (n == 1)	{ /*dump_stack(5);*/ return 1; }
+	return n * factorial(n - 1);
+}
+
+/**
+ * Function main
+ * -------------
+ * -dumpovani stacku a podobne
+ */
 int main(int argc, char *argv[]) {
 	int i = 0xaaabbb;
 	void *bp_value, *sp_value;
@@ -18,5 +35,6 @@ int main(int argc, char *argv[]) {
 	dump(bp_value, 64);
 	dump(sp_value, 64);
 	dump((void *)(unsigned long)sp_value - 64, 64);
+	factorial(5);
 	return 0;
 }

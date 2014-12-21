@@ -6,6 +6,7 @@
  */
 
 #include <stdio.h>
+#include <assert.h>
 #include "dump.h"
 
 void dump(void *addr, int len) {
@@ -23,4 +24,21 @@ void dump(void *addr, int len) {
 		}                                              
 	}                                                
 	printf("-----------------------------------\n"); 
+}
+
+void static dump_range(void *addr_from, void *addr_to) {
+	int l = (char *)addr_to - (char *)addr_from;
+	assert(l > 0);
+	dump(addr_from, l);
+}
+
+void dump_stack(int depth) {
+	void *bp_value, *sp_value;
+	asm("movq %%rbp, %0;" : "=r" (bp_value) : );
+	asm("movq %%rsp, %0;" : "=r" (sp_value) : );
+	/* vem rbp + 8, coz by melo byt predchozi rbp a dumpuj od predchoziho rbp do aktualniho rbp */
+	// kdyz kompilator neni gcc - warning
+	printf("BASE: %lx; STACK: %lx\n", (long)bp_value, (long)sp_value);
+	//dump_range(sp_value, bp_value);
+	dump_range(sp_value, (char *)bp_value + 8);
 }

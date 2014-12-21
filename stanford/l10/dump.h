@@ -17,6 +17,17 @@
 #endif
 
 /**
+ * Enum Dump_Flags
+ * ---------------
+ * @brief flags controling memory dump output
+ */
+/*enum Dump_Flags{
+	D_BIG_ENDIAN = 0x01,      //Show 
+	D_LITTLE_ENDIAN = 0x02,
+	D_LIST_BACKWARDS = 0x04,
+};*/
+
+/**
  * Function dump
  * -------------
  * @param1 addr

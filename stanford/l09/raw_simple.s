@@ -34,6 +34,23 @@
  *               - Na zacatku subrutiny se na stack vlozi stara hodnota ebp, aby se mohla   
  *                 obnovit pri navratu ze subrutiny.
  *  delka instrukci v x86 je variabilni... 1-15 bytu
+ *
+ *  POznamka ze stackoverflow.com
+ *   GCC dictates how the stack is used. Contract between caller and callee on x86:
+ *    - after call instruction:
+ *      o %eip points at first instruction of function
+ *      o %esp+4 points at first argument
+ *      o %esp points at return address 
+ *    - after ret instruction:
+ *      o %eip contains return address
+ *      o %esp points at arguments pushed by caller
+ *      o called function may have trashed arguments
+ *      o %eax contains return value (or trash if function is void)
+ *      o %ecx, %edx may be trashed
+ *      o %ebp, %ebx, %esi, %edi must contain contents from time of call 
+ *    - Terminology:
+ *      o %eax, %ecx, %edx are "caller save" registers
+ *      o %ebp, %ebx, %esi, %edi are "callee save" registers 
  */
 	.file	"raw_simple.s"
 	.text

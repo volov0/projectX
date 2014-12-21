@@ -5,6 +5,7 @@
 
 CC=gcc
 CFLAGS=-c -g -Wall # -ansi -pedantic-errors
+SFLAGS=-S -O0 -fno-asynchronous-unwind-tables
 
  
 all: memory
@@ -14,9 +15,11 @@ memory: memory.o dump.o
 
 memory.o: memory.c  
 		$(CC) $(CFLAGS) memory.c
+		$(CC) $(SFLAGS) memory.c
 
 dump.o: dump.c dump.h
 		$(CC) $(CFLAGS) dump.c
+		$(CC) $(SFLAGS) dump.c
 
 clean:
 		rm -rf *o memory
