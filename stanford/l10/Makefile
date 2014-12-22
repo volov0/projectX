@@ -4,7 +4,7 @@
 #
 
 CC=gcc
-CFLAGS=-c -g -Wall # -ansi -pedantic-errors
+CFLAGS=-c -g -W #all # -ansi -pedantic-errors
 SFLAGS=-S -O0 -fno-asynchronous-unwind-tables
 
  

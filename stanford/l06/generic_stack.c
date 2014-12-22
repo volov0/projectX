@@ -43,6 +43,10 @@ void stack_dispose(stack *s) {
  * - technicky vzato static stanovuje StackGrow pro "internal linkage" - neexportuje se 
  *   v .o souboru, tudiz nelze volat z jineho souboru
  * - funkce bez static jsou globalni - to znamena, ze jsou exportovany v .o souboru
+ * Pokud static pouziju u definici C++ metody, tak to znamena, ze metoda neni metoda,
+ * ale normalni funkce a je tak zkompilovana. 
+ * - static metoda nema k dispozici this pointer 
+ * - static metodu lze volat aniz by existovala instance trida, ve ktere metoda je
  */
 static void StackGrow(stack *s) {
 	s->allocated_length *= 2;

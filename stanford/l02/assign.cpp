@@ -29,7 +29,7 @@ using namespace std;
  */
 int main(int argc, char **argv) {
 	cout << "size of int:   " << sizeof(int) << endl << "size of short: " << sizeof(short) <<endl;
-	cout << "size of float: " << sizeof(float) << endl;
+	cout << "size of float: " << sizeof(float) << endl << "size of (void *)" << sizeof(void *) << endl;
 	cout << "------------------------------------------------------------------------------------------------" << endl;
 	/* test 1 - 's=c' priradi binarne     */
 	{
