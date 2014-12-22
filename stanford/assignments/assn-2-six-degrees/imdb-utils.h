@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <stdlib.h>
+#include <strings.h>
 using namespace std;
 
 /**
@@ -43,7 +45,7 @@ struct film {
   
   bool operator<(const film& rhs) const { 
     return this->title < rhs.title || 
-           this->title == rhs.title && this->year < rhs.year; 
+           (this->title == rhs.title && this->year < rhs.year); 
   }
 };
 
@@ -62,8 +64,10 @@ inline const char *determinePathToData(const char *userSelectedPath = NULL)
   if (userSelectedPath != NULL) return userSelectedPath;
   
   const char *ostype = getenv("OSTYPE");
+  if (ostype == NULL) 
+    return "/home/aaa/projectX/stanford/assignments/assn-2-six-degrees-data/little-endian/";
   if (strcasecmp(ostype, "linux") == 0)
-    return "/usr/class/cs107/assignments/assn-2-six-degrees-data/little-endian/";
+    return "/home/aaa/projectX/stanford/assignments/assn-2-six-degrees-data/little-endian/";
   if (strcasecmp(ostype, "solaris") == 0)
     return "/usr/class/cs107/assignments/assn-2-six-degrees-data/big-endian/";
   

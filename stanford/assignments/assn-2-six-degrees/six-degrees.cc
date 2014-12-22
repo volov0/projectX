@@ -54,7 +54,9 @@ static string promptForActor(const string& prompt, const imdb& db)
 
 int main(int argc, const char *argv[])
 {
-  imdb db(determinePathToData(argv[1])); // inlined in imdb-utils.h
+  //imdb db(determinePathToData(argv[1])); // inlined in imdb-utils.h
+  imdb db(determinePathToData()); // inlined in imdb-utils.h
+  cout << "bbaaa" << endl;
   if (!db.good()) {
     cout << "Failed to properly initialize the imdb database." << endl;
     cout << "Please check to make sure the source files exist and that you have permission to read them." << endl;
