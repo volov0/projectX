@@ -7,7 +7,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "preproc.h"
+#include "preproc.h"    // tohle sem vlozi obsah preproc.h, je to rekurzivni
 
 
 
