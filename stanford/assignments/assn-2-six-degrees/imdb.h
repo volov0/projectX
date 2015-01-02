@@ -6,6 +6,17 @@
 #include <vector>
 using namespace std;
 
+// moje struktury pro udrzovani info o actorech
+struct akeyItem {
+  const char *name;  
+  const void *base;
+};
+  
+struct fkeyItem {
+  const film *movie;  
+  const void *base;
+};
+ 
 class imdb {
   
  public:
@@ -88,7 +99,7 @@ class imdb {
   static const char *const kMovieFileName;
   const void *actorFile;
   const void *movieFile;
-  
+
   // everything below here is complicated and needn't be touched.
   // you're free to investigate, but you're on your own.
   struct fileInfo {

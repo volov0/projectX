@@ -38,6 +38,59 @@ static string promptForActor(const string& prompt, const imdb& db)
 }
 
 /**
+ * Function generateShortestPath
+ * -----------------------------
+ * @param src name of an actor where connection should start
+ * @param db loaded imdb class
+ * @param dest name of an actor where connection should end
+ * @return pointer to shortest path between src and dest
+ */
+bool generateShortestPath(const imdb& db, const string& src, const string& target) {
+	list<path> partial_paths;
+	set<string> seen_actors;
+	set<film> seen_movies;
+	vector<film> credits;
+	vector<string> cast;
+	
+	partial_paths.push_back(path(src));
+	while (partial_paths.size() > 0) {
+		if (partial_paths.front().getLength() > 2) return NULL;
+		db.getCredits(partial_paths.front().getLastPlayer(), credits);
+		// go through credits
+		for (unsigned int i = 0; i < credits.size(); i++) {
+			if (seen_movies.count(credits[i]) == 0) {
+				seen_movies.insert(credits[i]);
+				// getcast for movie
+				db.getCast(credits[i], cast);
+				/* go through cast of an movie */
+				for (unsigned int j = 0; j < cast.size(); j++) {
+					/* check seen_actors */
+					if (seen_actors.count(cast[j]) == 0) {
+						seen_actors.insert(cast[i]);
+						/* add to partial path */
+						partial_paths.front().addConnection(credits[i], cast[j]); // temporary insert connection to front
+						partial_paths.push_back(partial_paths.front());           // add path to queue
+						partial_paths.front().undoConnection();                   // take back temporary last one
+						/* check target */
+						if (cast[j] == target) {
+							cout << partial_paths.back() << endl;
+							return true;
+						}
+					}
+				}
+				cast.clear();
+			}
+		}
+		credits.clear();                    // erase processed credits
+		partial_paths.pop_front();
+	}
+
+	cout << "path" << path(src) << endl;
+	return false;
+}
+
+
+/**
  * Serves as the main entry point for the six-degrees executable.
  * There are no parameters to speak of.
  *
@@ -54,9 +107,7 @@ static string promptForActor(const string& prompt, const imdb& db)
 
 int main(int argc, const char *argv[])
 {
-  //imdb db(determinePathToData(argv[1])); // inlined in imdb-utils.h
-  imdb db(determinePathToData()); // inlined in imdb-utils.h
-  cout << "bbaaa" << endl;
+  imdb db(determinePathToData(argv[1])); // inlined in imdb-utils.h
   if (!db.good()) {
     cout << "Failed to properly initialize the imdb database." << endl;
     cout << "Please check to make sure the source files exist and that you have permission to read them." << endl;
@@ -72,7 +123,8 @@ int main(int argc, const char *argv[])
       cout << "Good one.  This is only interesting if you specify two different people." << endl;
     } else {
       // replace the following line by a call to your generateShortestPath routine... 
-      cout << endl << "No path between those two people could be found." << endl << endl;
+	  if (!generateShortestPath(db, source, target))
+      	cout << endl << "No path between those two people could be found." << endl << endl;
     }
   }
   
