@@ -54,6 +54,7 @@ bool generateShortestPath(const imdb& db, const string& src, const string& targe
 	
 	partial_paths.push_back(path(src));
 	while (partial_paths.size() > 0) {
+		//cout << partial_paths.size() << endl;
 		if (partial_paths.front().getLength() > 2) return NULL;
 		db.getCredits(partial_paths.front().getLastPlayer(), credits);
 		// go through credits
@@ -66,7 +67,7 @@ bool generateShortestPath(const imdb& db, const string& src, const string& targe
 				for (unsigned int j = 0; j < cast.size(); j++) {
 					/* check seen_actors */
 					if (seen_actors.count(cast[j]) == 0) {
-						seen_actors.insert(cast[i]);
+						seen_actors.insert(cast[j]);
 						/* add to partial path */
 						partial_paths.front().addConnection(credits[i], cast[j]); // temporary insert connection to front
 						partial_paths.push_back(partial_paths.front());           // add path to queue
