@@ -18,6 +18,10 @@
 
 #include "bool.h"
 
+#define NthElemAddr(base, it_size, n) \
+        ((char *)(base) + (it_size)*(n))
+#define ValidPosition(i, length) (((i) >= 0) && (i < (length)))
+
 /**
  * Type: VectorCompareFunction
  * ---------------------------
@@ -68,7 +72,11 @@ typedef void (*VectorFreeFunction)(void *elemAddr);
  */
 
 typedef struct {
-  // to be filled in by you
+  void *base;                /**< address of the beggining of vector elements */
+  int  elem_size;            /**< size of vector element */
+  int  allocated_elems;      /**< number of elements that can fit into allocated space */
+  int  used_elems;           /**< number of elements in vector */
+  VectorFreeFunction freeFn; /**< function used when disposing elements */
 } vector;
 
 /** 

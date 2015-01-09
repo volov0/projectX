@@ -34,6 +34,7 @@ static void PrintChar(void *elem, void *fp)
 
 static int CompareChar(const void *elemA, const void *elemB)
 {
+	printf("%c %c\n", *(char *)elemA, *(char *)elemB);
   return (*(char *)elemA - *(char *)elemB);
 }
 
