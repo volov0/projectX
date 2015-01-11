@@ -58,10 +58,11 @@ void VectorInsert(vector *v, const void *elemAddr, int position) {
 	if (position < v->used_elems) {
 		memmove(NthElemAddr(v->base, v->elem_size, position + 1), 
 		        NthElemAddr(v->base, v->elem_size, position),
-				v->used_elems - position);
+				(v->used_elems - position) * v->elem_size);
 	}
 
 	memcpy(NthElemAddr(v->base, v->elem_size, position), elemAddr, v->elem_size);
+	v->used_elems++;
 }
 
 void VectorAppend(vector *v, const void *elemAddr) {	
@@ -75,6 +76,17 @@ void VectorAppend(vector *v, const void *elemAddr) {
 
 void VectorDelete(vector *v, int position) {
 	assert(ValidPosition(position, v->used_elems)); 
+
+	if (v->freeFn != NULL) v->freeFn(NthElemAddr(v->base, v->elem_size, position));
+
+	/* shift elements if necessary */
+	if (position < v->used_elems - 1) {
+		memmove(NthElemAddr(v->base, v->elem_size, position), 
+		        NthElemAddr(v->base, v->elem_size, position + 1),
+				(v->used_elems - position) * v->elem_size);
+	}
+
+	v->used_elems--;
 }
 
 void VectorSort(vector *v, VectorCompareFunction compare) {
