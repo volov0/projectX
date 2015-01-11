@@ -90,11 +90,12 @@ void VectorMap(vector *v, VectorMapFunction mapFn, void *auxData) {
 static const int kNotFound = -1;
 int VectorSearch(const vector *v, const void *key, VectorCompareFunction searchFn, int startIndex, bool isSorted) { 
 	char *res;
+	size_t vsize = v->used_elems;
 
 	if (isSorted) 
 		res = bsearch(key, v->base, v->used_elems, v->elem_size, searchFn);
-	else
-		;//res = lsearch(key, v->base, &(v->used_elems), v->elem_size, searchFn);
+	else 
+		res = lfind(key, v->base, &vsize, v->elem_size, searchFn);
 	
 	if (res == NULL) return kNotFound;
 
