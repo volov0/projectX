@@ -43,8 +43,14 @@ void VectorReplace(vector *v, const void *elemAddr, int position) {
 }
 
 static void VectorGrow(vector *v) {
-	v->allocated_elems *= 2;
-	v->base = realloc(v->base, v->allocated_elems * v->elem_size);
+	if (v->allocated_elems == 0) {
+		v->allocated_elems = 1;
+		v->base = malloc(v->allocated_elems * v->elem_size);
+	}
+	else {
+		v->allocated_elems *= 2;
+		v->base = realloc(v->base, v->allocated_elems * v->elem_size);
+	}
 	assert(v->base != NULL);
 }
 
