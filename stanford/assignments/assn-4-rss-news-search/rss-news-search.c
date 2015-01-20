@@ -9,19 +9,43 @@
 #include "urlconnection.h"
 #include "streamtokenizer.h"
 #include "html-utils.h"
-
+#include "hashset.h"
 static void Welcome(const char *welcomeTextFileName);
-static void BuildIndices(const char *feedsFileName);
-static void ProcessFeed(const char *remoteDocumentName);
-static void PullAllNewsItems(urlconnection *urlconn);
+static void BuildIndices(const char *feedsFileName, hashset *db, hashset *sw);
+static void BuildStopWords(const char *stopWordsFileName, hashset *h);
+static void ProcessFeed(const char *remoteDocumentName, hashset *db, hashset *sw);
+static void PullAllNewsItems(urlconnection *urlconn, hashset *db, hashset *sw);
 static bool GetNextItemTag(streamtokenizer *st);
-static void ProcessSingleNewsItem(streamtokenizer *st);
+static void ProcessSingleNewsItem(streamtokenizer *st, hashset *db, hashset *sw);
 static void ExtractElement(streamtokenizer *st, const char *htmlTag, char dataBuffer[], int bufferLength);
-static void ParseArticle(const char *articleTitle, const char *articleDescription, const char *articleURL);
-static void ScanArticle(streamtokenizer *st, const char *articleTitle, const char *unused, const char *articleURL);
-static void QueryIndices();
-static void ProcessResponse(const char *word);
+static void ParseArticle(const char *articleTitle, const char *articleDescription, const char *articleURL, hashset *db, hashset *sw);
+static void ScanArticle(streamtokenizer *st, const char *articleTitle, const char *unused, const char *articleURL,
+            hashset *db, hashset *sw);
+static void QueryIndices(hashset *db);
+static void ProcessResponse(const char *word, hashset *db);
 static bool WordIsWellFormed(const char *word);
+/* moje pridane */
+static void CreateOccurence(const char *articleURL, const char *articleTitle, vector *occurences); 
+static void CreateDBEntry(const char *word, const char *articleURL, const char *articleTitle, hashset *db); 
+static int StringHash(const void *s, int numBuckets);  
+static void PrintWord(void *elem, void *aux);
+static int CompareWord(const void *elem1, const void *elem2);
+static void FreeWord(void *elem);
+static void FreeDBItem(void *elem);
+static void FreeOccurence(void *elem);
+static void PrintDBItem(void *elem, void *aux);
+static void PrintOccurence(void *elem, void *aux);
+
+typedef struct occurence_item {
+	char *article_url;
+	char *article_name;
+	int  count;
+} occurence_item;
+
+typedef struct db_item {
+	char *word;
+	vector occurences;
+} db_item;
 
 /**
  * Function: main
@@ -40,16 +64,70 @@ static bool WordIsWellFormed(const char *word);
  * word appears.
  */
 
-static const char *const kWelcomeTextFile = "/usr/class/cs107/assignments/assn-4-rss-news-search-data/welcome.txt";
-static const char *const kDefaultFeedsFile = "/usr/class/cs107/assignments/assn-4-rss-news-search-data/rss-feeds.txt";
+static const char *const kWelcomeTextFile = "/home/aaa/projectX/stanford/assignments/assn-4-rss-news-search-data/welcome.txt";
+//static const char *const kDefaultFeedsFile = "/home/aaa/projectX/stanford/assignments/assn-4-rss-news-search-data/rss-feeds.txt";
+static const char *const kDefaultFeedsFile = "/home/aaa/projectX/stanford/assignments/assn-4-rss-news-search-data/rss-feeds-tiny.txt";
+static const char *const kStopWordsFile = 
+     "/home/aaa/projectX/stanford/assignments/assn-4-rss-news-search-data/stop-words.txt";
+static const char *const kTextSampleDelimiters = " \t\n\r\b!@$%^*()_+={[}]|\\'\":;/?.>,<~`"; /* test code */
 int main(int argc, char **argv)
 {
+  hashset stop_words;
+  hashset database;
+
+  BuildStopWords(kStopWordsFile, &stop_words);
+  //HashSetMap(&stop_words, PrintWord, NULL);
+  HashSetNew(&database, sizeof(db_item), 10007, StringHash, CompareWord, FreeDBItem);
+
   Welcome(kWelcomeTextFile);
-  BuildIndices((argc == 1) ? kDefaultFeedsFile : argv[1]);
-  QueryIndices();
+  BuildIndices((argc == 1) ? kDefaultFeedsFile : argv[1], &database, &stop_words);
+
+  /* test code */
+  /*  streamtokenizer st;
+	char *file_name = "/home/aaa/projectX/stanford/assignments/assn-4-rss-news-search-data/sample-rss-feed.txt";
+	FILE *samplefile;
+	samplefile = fopen(file_name, "r");
+	assert(samplefile != NULL);
+    STNew(&st, samplefile, kTextSampleDelimiters, false);
+    ScanArticle(&st, "Test article", "Test article description", "nikam", &database, &stop_words);
+    //HashSetMap(&database, PrintDBItem, NULL);
+    STDispose(&st);*/
+  /* test code end */
+
+  QueryIndices(&database);
+
+  /* cleanup */
+  HashSetDispose(&stop_words);
+  HashSetDispose(&database);
   return 0;
 }
 
+static const char *const kNewLineDelimiters = "\r\n";
+/**
+ * Function: BuildStopWords
+ * ------------------------
+ */
+static void BuildStopWords(const char *stopWordsFileName, hashset *h) {
+	FILE *infile;
+	streamtokenizer st;
+	char buffer[1024];
+	char *tstring;       // temporary string for inserting words onto hashset
+
+	infile = fopen(stopWordsFileName, "r");
+	assert(infile != NULL);
+
+	HashSetNew(h, sizeof(char *), 1009, StringHash, CompareWord, FreeWord);
+	//HashSetNew(h, sizeof(char *), 1009, StringHash, CompareWord, NULL);
+	STNew(&st, infile, kNewLineDelimiters, true);
+	while (STNextToken(&st, buffer, sizeof(buffer))) {
+		tstring = strdup(buffer);   // make new copy of the word
+		HashSetEnter(h, &tstring);     // and put it to hashset
+	}
+
+	STDispose(&st);
+	fclose(infile);
+	return;
+}
 /** 
  * Function: Welcome
  * -----------------
@@ -62,7 +140,6 @@ int main(int argc, char **argv)
  * is a configuration file that travels with the application.
  */
  
-static const char *const kNewLineDelimiters = "\r\n";
 static void Welcome(const char *welcomeTextFileName)
 {
   FILE *infile;
@@ -98,7 +175,7 @@ static void Welcome(const char *welcomeTextFileName)
  * document and index its content.
  */
 
-static void BuildIndices(const char *feedsFileName)
+static void BuildIndices(const char *feedsFileName, hashset *db, hashset *sw)
 {
   FILE *infile;
   streamtokenizer st;
@@ -110,7 +187,7 @@ static void BuildIndices(const char *feedsFileName)
   while (STSkipUntil(&st, ":") != EOF) { // ignore everything up to the first selicolon of the line
     STSkipOver(&st, ": ");		 // now ignore the semicolon and any whitespace directly after it
     STNextToken(&st, remoteFileName, sizeof(remoteFileName));   
-    ProcessFeed(remoteFileName);
+    ProcessFeed(remoteFileName, db, sw);
   }
   
   STDispose(&st);
@@ -128,7 +205,7 @@ static void BuildIndices(const char *feedsFileName)
  * for ParseArticle for information about what the different response codes mean.
  */
 
-static void ProcessFeed(const char *remoteDocumentName)
+static void ProcessFeed(const char *remoteDocumentName, hashset *db, hashset *sw)
 {
   url u;
   urlconnection urlconn;
@@ -139,10 +216,10 @@ static void ProcessFeed(const char *remoteDocumentName)
   switch (urlconn.responseCode) {
       case 0: printf("Unable to connect to \"%s\".  Ignoring...", u.serverName);
               break;
-      case 200: PullAllNewsItems(&urlconn);
+      case 200: PullAllNewsItems(&urlconn, db, sw);
                 break;
       case 301: 
-      case 302: ProcessFeed(urlconn.newUrl);
+      case 302: ProcessFeed(urlconn.newUrl, db, sw);
                 break;
       default: printf("Connection to \"%s\" was established, but unable to retrieve \"%s\". [response code: %d, response message:\"%s\"]\n",
 		      u.serverName, u.fileName, urlconn.responseCode, urlconn.responseMessage);
@@ -181,12 +258,12 @@ static void ProcessFeed(const char *remoteDocumentName)
  */
 
 static const char *const kTextDelimiters = " \t\n\r\b!@$%^*()_+={[}]|\\'\":;/?.>,<~`";
-static void PullAllNewsItems(urlconnection *urlconn)
+static void PullAllNewsItems(urlconnection *urlconn, hashset *db, hashset *sw)
 {
   streamtokenizer st;
   STNew(&st, urlconn->dataStream, kTextDelimiters, false);
   while (GetNextItemTag(&st)) { // if true is returned, then assume that <item ...> has just been read and pulled from the data stream
-    ProcessSingleNewsItem(&st);
+    ProcessSingleNewsItem(&st, db, sw);
   }
   
   STDispose(&st);
@@ -248,7 +325,7 @@ static const char *const kItemEndTag = "</item>";
 static const char *const kTitleTagPrefix = "<title";
 static const char *const kDescriptionTagPrefix = "<description";
 static const char *const kLinkTagPrefix = "<link";
-static void ProcessSingleNewsItem(streamtokenizer *st)
+static void ProcessSingleNewsItem(streamtokenizer *st, hashset *db, hashset *sw)
 {
   char htmlTag[1024];
   char articleTitle[1024];
@@ -263,7 +340,7 @@ static void ProcessSingleNewsItem(streamtokenizer *st)
   }
   
   if (strncmp(articleURL, "", sizeof(articleURL)) == 0) return;     // punt, since it's not going to take us anywhere
-  ParseArticle(articleTitle, articleDescription, articleURL);
+  ParseArticle(articleTitle, articleDescription, articleURL, db, sw);
 }
 
 /**
@@ -318,7 +395,7 @@ static void ExtractElement(streamtokenizer *st, const char *htmlTag, char dataBu
  * enumeration of all possibilities.
  */
 
-static void ParseArticle(const char *articleTitle, const char *articleDescription, const char *articleURL)
+static void ParseArticle(const char *articleTitle, const char *articleDescription, const char *articleURL, hashset *db, hashset *sw)
 {
   url u;
   urlconnection urlconn;
@@ -332,12 +409,12 @@ static void ParseArticle(const char *articleTitle, const char *articleDescriptio
 	      break;
       case 200: printf("Scanning \"%s\" from \"http://%s\"\n", articleTitle, u.serverName);
 	        STNew(&st, urlconn.dataStream, kTextDelimiters, false);
-		ScanArticle(&st, articleTitle, articleDescription, articleURL);
+		ScanArticle(&st, articleTitle, articleDescription, articleURL, db, sw); 
 		STDispose(&st);
 		break;
       case 301:
       case 302: // just pretend we have the redirected URL all along, though index using the new URL and not the old one...
-                ParseArticle(articleTitle, articleDescription, urlconn.newUrl);
+                ParseArticle(articleTitle, articleDescription, urlconn.newUrl, db, sw);
 		break;
       default: printf("Unable to pull \"%s\" from \"%s\". [Response code: %d] Punting...\n", articleTitle, u.serverName, urlconn.responseCode);
 	       break;
@@ -347,6 +424,46 @@ static void ParseArticle(const char *articleTitle, const char *articleDescriptio
   URLDispose(&u);
 }
 
+/**
+ * Function: CreateOccurence
+ * -------------------------
+ * Inserts word occurence into occurences vector
+ */
+static void CreateOccurence(const char *articleURL, const char *articleTitle, vector *occurences) {
+	occurence_item new_word_article;
+
+	/* I must have the right vector... */
+	int word_article_index = VectorSearch(occurences, &articleURL, CompareWord, 0, false);
+	if (word_article_index >= 0)
+		((occurence_item *)VectorNth(occurences, word_article_index))->count++;
+	else {
+		new_word_article.article_url = strdup(articleURL);
+		new_word_article.article_name = strdup(articleTitle);
+		new_word_article.count = 1;
+		VectorAppend(occurences, &new_word_article);
+	}
+}
+
+
+/**
+ * Function: CreateDBEntry
+ * -----------------------
+ * Inserts new word into search database.
+ */
+static void CreateDBEntry(const char *word, const char *articleURL, const char *articleTitle, hashset *db) {
+	db_item new_word;
+
+	/* new hashset entry */
+	new_word.word = strdup(word);
+	assert(new_word.word != NULL);
+	VectorNew(&(new_word.occurences), sizeof(occurence_item), FreeOccurence, 4);
+
+	/* new vector entry inside hashset item */
+	CreateOccurence(articleURL, articleTitle, &(new_word.occurences));
+
+	HashSetEnter(db, &new_word);
+
+}
 /**
  * Function: ScanArticle
  * ---------------------
@@ -360,24 +477,43 @@ static void ParseArticle(const char *articleTitle, const char *articleDescriptio
  * code that indexes the specified content.
  */
 
-static void ScanArticle(streamtokenizer *st, const char *articleTitle, const char *unused, const char *articleURL)
+static void ScanArticle(streamtokenizer *st, const char *articleTitle, const char *unused, const char *articleURL,
+            hashset *db, hashset *sw)
 {
-  int numWords = 0;
-  char word[1024];
-  char longestWord[1024] = {'\0'};
+	int numWords = 0;
+	char word[1024];
+	char *word_pointer;
+	char longestWord[1024] = {'\0'};
+	db_item *word_entry;
 
-  while (STNextToken(st, word, sizeof(word))) {
-    if (strcasecmp(word, "<") == 0) {
-      SkipIrrelevantContent(st); // in html-utls.h
-    } else {
-      RemoveEscapeCharacters(word);
-      if (WordIsWellFormed(word)) {
-	numWords++;
-	if (strlen(word) > strlen(longestWord))
-	  strcpy(longestWord, word);
-      }
-    }
-  }
+	/* check if article hasn't been already processed - todo - vytvorit novy hashset */
+
+	while (STNextToken(st, word, sizeof(word))) {
+		if (strcasecmp(word, "<") == 0) {
+			SkipIrrelevantContent(st); // in html-utls.h
+		} else {
+			RemoveEscapeCharacters(word);
+			if (WordIsWellFormed(word)) {
+				numWords++;
+				if (strlen(word) > strlen(longestWord))
+					strcpy(longestWord, word);
+
+				/* check for stopwords */
+				word_pointer = (char *)&word;
+				if (HashSetLookup(sw, &word_pointer) != NULL) continue; // stop word
+
+				/* find word in database */	
+				word_entry = HashSetLookup(db, &word_pointer);
+				
+				if (word_entry != NULL) { // if found create new occurence of word 
+					CreateOccurence(articleURL, articleTitle, &(word_entry->occurences));
+				}	
+				else { // if not found create a new hashset entry
+					CreateDBEntry(word, articleURL, articleTitle, db);
+				}
+			}
+		}	
+	}
 
   printf("\tWe counted %d well-formed words [including duplicates].\n", numWords);
   printf("\tThe longest word scanned was \"%s\".", longestWord);
@@ -394,7 +530,7 @@ static void ScanArticle(streamtokenizer *st, const char *articleTitle, const cha
  * that contain that word.
  */
 
-static void QueryIndices()
+static void QueryIndices(hashset *db)
 {
   char response[1024];
   while (true) {
@@ -402,7 +538,7 @@ static void QueryIndices()
     fgets(response, sizeof(response), stdin);
     response[strlen(response) - 1] = '\0';
     if (strcasecmp(response, "") == 0) break;
-    ProcessResponse(response);
+    ProcessResponse(response, db);
   }
 }
 
@@ -413,11 +549,22 @@ static void QueryIndices()
  * for a list of web documents containing the specified word.
  */
 
-static void ProcessResponse(const char *word)
+static void ProcessResponse(const char *word, hashset *db)
 {
   if (WordIsWellFormed(word)) {
     printf("\tWell, we don't have the database mapping words to online news articles yet, but if we DID have\n");
     printf("\tour hashset of indices, we'd list all of the articles containing \"%s\".\n", word);
+	//char *word_pointer;
+	db_item *found_word;
+	found_word = HashSetLookup(db, &word);
+	if (found_word != NULL) {
+		VectorSort(&(found_word->occurences), CompareWord);
+		PrintDBItem(found_word, NULL);
+		// map
+	}
+	else {
+		printf("Word %s was not found in the database,.\n", word);
+	}
   } else {
     printf("\tWe won't be allowing words like \"%s\" into our set of indices.\n", word);
   }
@@ -444,3 +591,114 @@ static bool WordIsWellFormed(const char *word)
 
   return true;
 }
+
+/** 
+ * StringHash                     
+ * ----------  
+ * This function adapted from Eric Roberts' "The Art and Science of C"
+ * It takes a string and uses it to derive a hash code, which   
+ * is an integer in the range [0, numBuckets).  The hash code is computed  
+ * using a method called "linear congruence."  A similar function using this     
+ * method is described on page 144 of Kernighan and Ritchie.  The choice of                                                     
+ * the value for the kHashMultiplier can have a significant effect on the                            
+ * performance of the algorithm, but not on its correctness.                                                    
+ * This hash function has the additional feature of being case-insensitive,  
+ * hashing "Peter Pawlowski" and "PETER PAWLOWSKI" to the same code.  
+ */  
+
+static const signed long kHashMultiplier = -1664117991L;
+static int StringHash(const void *s, int numBuckets)  
+{            
+  int i;
+  char *el = *(char **) s;
+  unsigned long hashcode = 0;
+  
+  for (i = 0; i < strlen(el); i++)  
+    hashcode = hashcode * kHashMultiplier + tolower(el[i]);
+	    
+  return hashcode % numBuckets;                                
+}
+
+/**
+ * Function PrintWord 
+ * ------------------
+ * Function for HashsetMap() printing
+ */
+static void PrintWord(void *elem, void *aux) {
+	printf("%s\n", *(char **)elem);
+}
+
+/**
+ * Function CompareWord 
+ * ------------------
+ * Function for comparing words
+ */
+static int CompareWord(const void *elem1, const void *elem2) {
+	//printf("%s %s %d\n", *(char **)elem1, *(char **)elem2, strcmp(*(char **)elem1, *(char **)elem2));
+	return strcasecmp(*(char **)elem1, *(char **)elem2);
+}
+
+/**
+ * Function FreeWord 
+ * ------------------
+ * Function for releasing memory
+ */
+static void FreeWord(void *elem) {
+	free(*(char **)elem);
+}
+
+/**
+ * Function FreeDBItem 
+ * -------------------
+ * Function for releasing memory
+ */
+static void FreeDBItem(void *elem) {
+	db_item *di = (db_item *)elem;
+	free(di->word);
+	VectorDispose(&(di->occurences));
+	return;
+}
+
+/**
+ * Function FreeOccurence
+ * ----------------------
+ * Function for releasing memory
+ */
+static void FreeOccurence(void *elem) {
+	occurence_item *oi = (occurence_item *)elem;
+	free(oi->article_name);
+	free(oi->article_url);
+	return;
+}
+
+/**
+ * Function PrintDBItem
+ * ---------------------
+ * Function for HashsetMap() printing
+ */
+static void PrintDBItem(void *elem, void *aux) {
+	db_item *di = (db_item *)elem;
+	int count = 1;
+
+	printf("We found %d articled with word %s.", VectorLength(&(di->occurences)), di->word);
+	if (VectorLength(&(di->occurences)) > 10) printf(" [We'll just list 10, though.]"); 
+	printf("\n");
+	       
+	VectorMap(&(di->occurences), PrintOccurence, &count);
+}
+
+/**
+ * Function PrintOccurence
+ * -----------------------
+ * Function for HashsetMap() printing
+ */
+static void PrintOccurence(void *elem, void *aux) {
+	occurence_item *oi = (occurence_item *)elem;
+	int *count = (int *)aux;
+	if (*count > 10) return;
+
+	printf("%2d.) \" %s\" [search term occurs %d times]\n    \"%s\"\n", 
+	       *count, oi->article_name, oi->count, oi->article_url);
+}
+
+
