@@ -8,6 +8,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <pthread.h>
 
 
 void sell_tickets(int agent_id, int num_tickets_to_sell);
@@ -18,10 +19,12 @@ void sell_tickets(int agent_id, int num_tickets_to_sell);
  */
 int main(int argc, char *argv[]) {
 	int num_agents = 10;
+	pthread_t tid[10];
 	int num_tickets = 150;
 	int agent;
 	
-	for (agent = 0; agent <= num_agents; agent++) {   
+	for (agent = 0; agent <= num_agents; agent++) {  
+		pthread_create(&tid[agent], NULL, &sell_tickets, NULL); 
 		sell_tickets(agent, num_tickets / num_agents);
 	}
 
