@@ -11,7 +11,7 @@ SFLAGS=-S -O0 -fno-asynchronous-unwind-tables
 all: threads 
 
 threads: threads.o
-		$(CC) threads.o -o threads
+		$(CC) -pthread threads.o -o threads
 
 threads.o: threads.c  
 		$(CC) $(CFLAGS) threads.c
