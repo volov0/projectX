@@ -46,7 +46,8 @@ int main(int argc, char *argv[]) {
 	void *res;
 	
 	rc = sem_init(&empty_buffers, 0, 8);               // empty semafor zacina s 8 - cely buffer je k dispozici pro zapis
-	if (rc != 0) handle_error_en(rc, "sem_init");
+                                                       // inicializaci muzu dat klidne na 1 a bude fungovat
+	if (rc != 0) handle_error_en(rc, "sem_init");      
 	rc = sem_init(&full_buffers, 0, 0);                // full semafor zacina s 0 - nic nebylo zapsano - nic nelze cist
 	if (rc != 0) handle_error_en(rc, "sem_init");
 
