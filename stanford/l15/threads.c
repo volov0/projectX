@@ -3,7 +3,7 @@
  * @author volovo
  * @date 27.01.2015
  * @brief Multithreading sample.
- * @detail ... 
+ * @detail Binary lock 
  */
 
 #include <string.h>
@@ -49,7 +49,8 @@ int main(int argc, char *argv[]) {
 	void *res;
 	int sum = 0;
 
-	pthread_mutex_init(&tmutex, NULL);
+	rc = pthread_mutex_init(&tmutex, NULL);
+	if (rc != 0) handle_error_en(rc, "pthread_mutex_init");
 	
 	for (agent = 0; agent < num_agents; agent++) {  
 		tinfo[agent].tmutex = &tmutex;
@@ -68,15 +69,20 @@ int main(int argc, char *argv[]) {
 	}
 
 	printf("celkem prodano %d jizdenek.\n", sum);
-	pthread_mutex_destroy(&tmutex);
+
+	rc = pthread_mutex_destroy(&tmutex);
+	if (rc != 0) handle_error_en(rc, "pthread_mutex_destroy");
 
 	return 0; 
 }
 
 void *sell_tickets(void *arg) {
 	thread_info *tinfo = (thread_info *)arg;
+	int rc;
+
 	while (1) {
-		pthread_mutex_lock(tinfo->tmutex);
+		rc = pthread_mutex_lock(tinfo->tmutex);
+		if (rc != 0) handle_error_en(rc, "pthread_mutex_lock");
 
 		if (*(tinfo->num_tickets_to_sell) == 0) break;
 		(*(tinfo->num_tickets_to_sell))--;
@@ -84,13 +90,15 @@ void *sell_tickets(void *arg) {
 		printf("Agent %d prodava jizdenku.\n", tinfo->agent_id);
 		if (random_chance(0.2)) sleep(1);
 
-		pthread_mutex_unlock(tinfo->tmutex);
+		rc = pthread_mutex_unlock(tinfo->tmutex);
+		if (rc != 0) handle_error_en(rc, "pthread_mutex_unlock");
 
 		tinfo->num_tickets_sold++;
 		if (random_chance(0.2)) sleep(1);
 	}
 	/* pokud se udela v predchozi smycce break je treba unlock */
-	pthread_mutex_unlock(tinfo->tmutex);  
+	rc = pthread_mutex_unlock(tinfo->tmutex);  
+	if (rc != 0) handle_error_en(rc, "pthread_mutex_unlock");
 
 	printf("Agent %d: hotovo.\n", tinfo->agent_id);
 	return NULL;
