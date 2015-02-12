@@ -61,7 +61,14 @@ int main(int argc, char *argv[]) {
 		if (rc != 0) handle_error_en(rc, "pthread_create");
 	}
 
-	/* posbirej thready */
+	/* posbirej thready
+	 *  - pokud bych nemel nic jako funkci pthread_join, lze to nahradit semaforem,
+	 *	  ten se inicializuje na 0, kazde vlakno na konci sve funkce udela sem_post
+	 *    na tento semafor a zde se misto pthread_join udela sem_wait ve for cyklu
+	 *    a tim je zruceno, ze po skonceni nasledujiciho for cyklu vse skoncilo.
+	 *  - jeste dalsi moznost je inicializovat semafor na -(n-1) a udelat jen jeden 
+	 *    sem_wait... pokud to jde.
+	 */
 	for (i = 0; i < PHILOSOPHERS_COUNT; i++) {
 		rc = pthread_join(philosophers[i], &res);
 		if (rc != 0) handle_error_en(rc, "pthread_join");
