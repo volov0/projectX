@@ -5,7 +5,7 @@
 SC=csc
 
  
-all: sum sum_main sum-dynamic 
+all: sum sum_main sum-dynamic sum-c 
 
 sum: sum.o
 		$(SC) sum.o -o sum
@@ -21,6 +21,9 @@ sum_main.o: sum_main.scm
 
 sum-dynamic: sum.scm
 		$(SC) -dynamic sum.scm
+
+sum-c: sum.scm
+		$(SC) -t sum.scm -optimize-level 3 -output-file sum.c
 
 clean:
 		rm -rf *o sum
