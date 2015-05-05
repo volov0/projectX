@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 # Ukazka na networking a xml
+# SAX - Simple API for XML - vyhoda, je ze netaha cely XML dokument do pameti
+#     - tohle je nevhodne treba pro web browsery, ktere jsou dynamicke, coz
+#       znamena, ze maji ma pameti dynamicky model HTML(XML) - DOM a ten renderuji,
+#       pokud se neco v HTML zmeni dynamicky (javascript) browser zmeni naloadovany
+#       model a prekresli...
 
 from urllib2 import urlopen
 from xml.sax import make_parser, ContentHandler
