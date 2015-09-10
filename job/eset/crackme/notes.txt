@@ -1,0 +1,11 @@
+Postup na heslo:
+1. Pustit IDA, najit misto, kde se testuje na debugger, a tam test preskocit.
+2. Testovani hesla zacina na adrese 004014c5
+3. Vyresit soustavu rovnic a heslo muze byt napriklad:
+ursmotocDd
+
+pouzite breakpointy:
+1. 00425128
+2. 00401c41
+3. 0040144c - test na debugger - prepsat eax na 0
+4. 004014bf - cte se string z klavesnice
