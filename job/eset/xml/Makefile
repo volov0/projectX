@@ -8,9 +8,9 @@ CFLAGS=-c -g -Wall -std=c++11 #-ansi -pedantic-errors
 all: rxml
 
 rxml: rxml.o
-	$(CPP) rxml.o -o rxml
+	$(CPP) -pthread rxml.o -o rxml
 
-rxml.o: rxml.cpp
+rxml.o: rxml.cpp taqueue.hpp
 	$(CPP) $(CFLAGS) rxml.cpp -o rxml.o
 
 clean:

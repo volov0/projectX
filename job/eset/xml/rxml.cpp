@@ -4,22 +4,21 @@
  * @brief  XML parser with <thread>
  */
 
-#include <iostream>         // std::cout
-#include <fstream>          // std::file
-#include <queue>            // std::queue
-#include <thread>           // std::thread
-#include <mutex>            // std::mutex
+#include <iostream>      
+#include <fstream>        
+#include <thread>             
+#include <regex>             
+#include "taqueue.hpp"       
 
 using namespace std;
 
-void reader_writer(ifstream& file, queue<char>& inq);
-void tag_filter(queue<char>& inq, queue<char>& outq); 
-void printer(queue<char>& q); 
+void reader_writer(ifstream& file, asynch_queue<char>& inq, asynch_queue<char>& outq);
+void tag_filter(asynch_queue<char>& inq, asynch_queue<char>& outq); 
+void printer(asynch_queue<char>& q);
+bool start_of_prohibited_tag(const std::string& s, std::string& tag); 
+bool end_of_prohibited_tag(const std::string& s, const std::string& tag); 
 
-mutex iq_mutex;
-mutex oq_mutex;
-queue<char> inbuffer;
-queue<char> outbuffer;
+
 
 /**
  * Function main
@@ -27,6 +26,8 @@ queue<char> outbuffer;
  */
 int main(int argc, char **argv) {
 	ifstream myfile;
+	asynch_queue<char> inbuffer;
+	asynch_queue<char> outbuffer;
 
 	myfile.open("index.xml");
 	if (!myfile.is_open()) {
@@ -34,11 +35,12 @@ int main(int argc, char **argv) {
 		exit(0);
 	}
 
-	reader_writer(myfile, inbuffer);
+	thread t1(reader_writer, ref(myfile), ref(inbuffer), ref(outbuffer));
+	thread t2(tag_filter, ref(inbuffer), ref(outbuffer));
 	// todo: join xml filter
-	// todo: vyprazdni a cti outbuffer
-	tag_filter(inbuffer, outbuffer);
-	printer(outbuffer);
+	t1.join();
+	t2.join();
+	//thread t3(printer, ref(outbuffer));
 
 	myfile.close();
 
@@ -50,37 +52,107 @@ int main(int argc, char **argv) {
  * Function reader_writer
  * ----------------------
  */
-void reader_writer(ifstream& file, queue<char>& inq) {
+void reader_writer(ifstream& file, asynch_queue<char>& inq, asynch_queue<char>& outq) {
 	char c;
+	this_thread::sleep_for(chrono::milliseconds(10));
 
 	while (file.get(c)) {
-		iq_mutex.lock();
+		/* add to input buffer */
 		inq.push(c);
-		iq_mutex.unlock();
 
-		// todo: cti z outbufferu
+		//this_thread::sleep_for(chrono::milliseconds(12));
+
+		/* try read from output buffer */
+		while (outq.try_pop(c)) {
+			cout << c;
+		}
 	}
+
+	// say file is processed
+	inq.terminate();
+
+	/* read last chunk from output buffer */
+	cout << "rw flush outq" << endl;
+	while (outq.pop(c)) {
+		cout << c;
+	}
+	cout << "rw flush DONE" << endl;
 }
 
 /**
  * Function tag_filter
  * -------------------
  */
-void tag_filter(queue<char>& inq, queue<char>& outq) {
+void tag_filter(asynch_queue<char>& inq, asynch_queue<char>& outq) {
 	char c; 
+	bool in_tag = false, in_proh = false;
+	string buffer, start_tag;
 
-	while(!inq.empty()) {
-		iq_mutex.lock();
-		c = inq.front();
-		inq.pop();
-		iq_mutex.unlock();
+	while(inq.pop(c)) { 
+		//this_thread::sleep_for(chrono::milliseconds(10));
 
-		if (c == '<' || c == '>')
-			c = '#';
+		/* process character */
 
-		oq_mutex.lock();
-		outq.push(c);
-		oq_mutex.unlock();
+		if (in_tag) {
+			buffer += c;
+			if (c == '>') {
+				// process buffer
+				if (in_proh) {
+					if (end_of_prohibited_tag(buffer, start_tag)) {
+						in_proh = false;
+					}
+				}
+				//cout << "tw >>>> " << buffer << endl;
+				else if (start_of_prohibited_tag(buffer, start_tag)) {
+					if (buffer[buffer.size() - 2] != '/') {   // single terminated tag
+						in_proh = true;
+						cerr << "tw start of proh " << buffer << endl;
+					}
+				}
+				else {
+					for (unsigned i = 0; i < buffer.size(); i++)
+						outq.push(buffer[i]); 
+				}
+				buffer.clear();
+				in_tag = false;
+			}
+		}
+		else {
+			/* put result to the output buffer */
+			if (c == '<') {
+				in_tag = true;
+				buffer += c;
+			}
+			else if (!in_proh) {
+				outq.push(c);
+			}
+		}
+
+	}
+	
+	/* say filtering is done */
+	cout << "tw terminate" << endl;
+	outq.terminate();
+}
+
+bool end_of_prohibited_tag(const std::string& s, const std::string& tag) {
+	std::string cs;
+	cs = "</>" + tag + ">";
+	cerr << "EOPT testing " << s << " tag: " << tag << "res: " << (s == cs) << endl;
+	return (s == cs);
+}
+bool start_of_prohibited_tag(const std::string& s, std::string& tag) {
+	std::smatch sm;
+	std::regex e("<(img|object|script).*>");
+	cerr << "SOPT testing " << s;
+	if (std::regex_match(s, sm, e)) {
+		tag = sm[1];
+		cerr << " TRUE - " << sm[1] << endl;
+		return true;
+	}
+	else {
+		cerr << " FALSE" << endl;
+		return false;
 	}
 }
 
@@ -88,11 +160,9 @@ void tag_filter(queue<char>& inq, queue<char>& outq) {
  * Function printer
  * ----------------
  */
-void printer(queue<char>& q) {
-	while (!q.empty()) {
-		oq_mutex.lock();
-		cout  << q.front();
-		q.pop();
-		oq_mutex.unlock();
+void printer(asynch_queue<char>& q) {
+	char c;
+	while (q.pop(c)) {
+		cout  << c;
 	}
 }
