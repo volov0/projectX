@@ -143,7 +143,7 @@ bool end_of_prohibited_tag(const std::string& s, const std::string& tag) {
 }
 bool start_of_prohibited_tag(const std::string& s, std::string& tag) {
 	std::smatch sm;
-	std::regex e("<(img|object|script).*>");
+	std::regex e("<(img|object|script).*>");   // buggy in g++
 	cerr << "SOPT testing " << s;
 	if (std::regex_match(s, sm, e)) {
 		tag = sm[1];
