@@ -18,10 +18,18 @@ int main(int argc, char **argv) {
 	/**
 	 * Initialize.
 	 */
-	printf("Vole\n");
+	int i, a;
+	i = 5;
+	a = i++ + i++ + i++;
+	printf("Vole a=%d, i=%d\n", a, i);
+
+	i = 5;
+	a = ++i + ++i + ++i + ++i;
+	printf("Vole a=%d, i=%d\n", a, i);
 
 	/* Return. */
-	return EXIT_SUCCESS;
+	//return EXIT_SUCCESS;
+	return 0;
 
 	/* unreachable */
 }
