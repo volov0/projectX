@@ -1,0 +1,28 @@
+<xml>
+<head>
+<title>Simple XHTML Document</title>
+</head>
+<body>
+<p>All non-text tags should be removed on output
+<img src="photo.jpg" /></p>
+
+<script>
+document.write("A script should be removed, too.")
+</script>
+
+<table>
+<tr><th>1</th><th>2</th></tr>
+<tr><td>This table's last cell should be empty on output.</td><td>
+
+<object><param/></object>
+
+</td></tr>
+</table>
+
+<Img><object data="example.png" type="image/png" /></img>
+
+<object><object><param/></object>aaa</object>
+
+</body>
+</xml>
+
