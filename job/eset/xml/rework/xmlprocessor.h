@@ -17,18 +17,17 @@
  */
 class XMLProcessor {
 private:
-	//std::string buffer;              /**< work buffer */
 	std::ifstream file;              /**< XML file */
 	bool terminated;                 /**< Filter termination flag */
 
 	std::string ret_s;               /**< return string. Content is filtered */
-	//std::mutex ret_s_empty_mutex;    /**< return string mutex */
-	//std::mutex ret_s_full_mutex;     /**< return string mutex */
 	std::mutex ret_s_mutex;          /**< return string mutex */
 
 	char shared_c;                   /**< input char shared across threads */
 	std::mutex shared_c_empty_mutex; /**< input char mutex */
 	std::mutex shared_c_full_mutex;  /**< input char mutex */
+
+	//todo: std::map<std::string,bool> prohibited; /**< map of prohibited tags*/
 
 public:
 	/**

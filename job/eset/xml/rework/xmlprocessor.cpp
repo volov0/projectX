@@ -46,55 +46,35 @@ void XMLProcessor::reader_writer() {
 	char c;
 
 	while(file.get(c)) {
-		/* wake up filter and pass character */
-		//sem_wait(empty);   // wait for Filter to process char
+		/* Wait for process() to process char */
 		shared_c_empty_mutex.lock();
 
 		shared_c = c;
 		//std::cout << "rw: shared_c set as " << c << std::endl;
 
-		//sem_post(full);    // signal Filter char is ready to process
+		/* Signal process() that char is ready to process */
 		shared_c_full_mutex.unlock();
 
-		/* print output */
+		/* Print output */
 		print_it();
-		/*ret_s_mutex.lock();
-		if (!ret_s.empty()) {
-			//std::cout << "rw: ret_s get as " << ret_s << std::endl;
-			std::cout << ret_s;
-			ret_s.clear();
-		}
-		ret_s_mutex.unlock();*/
 	}
 
-	/* say file is processed */
+	/* Say file is processed */
 	terminate();
 
-	/* print last output */
+	/* Print last output */
 	print_it();
-	ret_s_mutex.lock();
-	if (!ret_s.empty()) {
-		std::cout << ret_s;
-		ret_s.clear();
-	}
-	ret_s_mutex.unlock();
-
-
-	/* read last chunk from output buffer */
-	/*while (outq.pop(c)) {
-		std::cout << c;
-	}*/
 }
 
 void XMLProcessor::process() {
 	char c;
 	bool in_tag = false;       // says that processing is inside <,> brackets
-	bool in_proh = false;      // says that processing is inside of text which should not be printed
+	int in_proh = 0;           // nesting level of prohibited tag
 	std::string buffer;        // working buffer - usually contains tag which is currently processed
 	std::string start_tag;     // if processing is "in_proh" state it contains name of prohibited tag
 
 	while(1) {
-		/* wait till something input is ready or filter is terminated */
+		/* Wait till input is ready or filter is terminated */
 		//sem_wait(full);
 		shared_c_full_mutex.lock();
 
@@ -113,21 +93,20 @@ void XMLProcessor::process() {
 			buffer += c;
 			if (c == '>') {
 				/* process buffer - it contains complete tag at this point */
-				if (in_proh) {
-					//std::cout << "@" << start_tag << "@";
-					if (end_of_prohibited_tag(buffer, start_tag)) {
-						/* say we are out of "prohibited" mode - means output can be printed */
-						in_proh = false;
+				if (end_of_prohibited_tag(buffer, start_tag)) {
+					if (in_proh > 0) {
+						/* decrease nesting level of prohibited tag */
+						--in_proh;
 					}
 				}
 				else if (start_of_prohibited_tag(buffer, start_tag)) {
 					/* check for single tag */
 					if (buffer[buffer.size() - 2] != '/') {
-						/* say we are in "prohibited" mode - means output is not printed */
-						in_proh = true;
+						/* increase nesting level of prohibited tag */
+						++in_proh;
 					}
 				}
-				else {
+				else if (in_proh == 0){
 					/* buffer contains allowed tag so append it to return string */
 					ret_s_mutex.lock();
 					ret_s += buffer;
@@ -144,7 +123,7 @@ void XMLProcessor::process() {
 				in_tag = true;
 				buffer += c;
 			}
-			else if (!in_proh) {
+			else if (in_proh == 0) {
 				/* c is simple character - append it to return string */
 				ret_s_mutex.lock();
 				ret_s += c;
@@ -159,8 +138,7 @@ void XMLProcessor::process() {
 
 void XMLProcessor::terminate() {
 	terminated = true;
-	/* wake up Filter process thread */
-	//sem_post(full);
+	/* Signal process() that char reading is finished */
 	shared_c_full_mutex.unlock();
 	std::cout << "Filter terminate()" << std::endl;
 }
@@ -173,8 +151,21 @@ void XMLProcessor::terminate() {
  * @return true if input tag is found to be terminating "prohibited" tag
  */
 bool end_of_prohibited_tag(const std::string& s, const std::string& tag_name) {
-	std::string cs("</" + tag_name + ">");
-	return (s == cs);
+	std::vector<std::string> prohibited = {"img", "object", "script"};
+	std::string cs;
+
+	/* sanity check */
+	if ((s.length() <= 4) || (s.substr(0,2) != "</"))
+		return false;
+	
+	/* compare tag name with prohibited tags */
+	cs = s.substr(2, s.length() - 3);         //contains tag name only 
+	for (unsigned i = 0; i < prohibited.size(); i++) {
+		if (cs.compare(prohibited[i]) == 0) {
+			return true;
+		}
+	}
+	return false;
 }
 
 /**
