@@ -10,12 +10,9 @@
 #include <fstream>
 #include <thread>
 #include <mutex>
-#include <vector>
+#include <map>
 #include <algorithm>
 
-/* todo */
-bool start_of_prohibited_tag(const std::string& s, std::string& tag);
-bool end_of_prohibited_tag(const std::string& s, const std::string& tag);
 
 XMLProcessor::XMLProcessor(char *filename) {
 	/* Open input file */
@@ -29,13 +26,17 @@ XMLProcessor::XMLProcessor(char *filename) {
 
 	/* Init lock state */
 	shared_c_full_mutex.lock();
-	//ret_s_full_mutex.lock();
+	
+	/* init prohibited tag set */
+	prohibited.insert(std::make_pair("img", 0));
+	prohibited.insert(std::make_pair("object", 0));
+	prohibited.insert(std::make_pair("script", 0));
 }
 
 void XMLProcessor::run() {
 	/* Run threads */
 	std::thread t1(&XMLProcessor::reader_writer, this);
-	std::thread t2(&XMLProcessor::process, this);
+	std::thread t2(&XMLProcessor::filter, this);
 
 	/* Collect threads */
 	t1.join();
@@ -46,13 +47,13 @@ void XMLProcessor::reader_writer() {
 	char c;
 
 	while(file.get(c)) {
-		/* Wait for process() to process char */
+		/* Wait for filter() to process char */
 		shared_c_empty_mutex.lock();
 
 		shared_c = c;
 		//std::cout << "rw: shared_c set as " << c << std::endl;
 
-		/* Signal process() that char is ready to process */
+		/* Signal filter() that char is ready to process */
 		shared_c_full_mutex.unlock();
 
 		/* Print output */
@@ -66,23 +67,19 @@ void XMLProcessor::reader_writer() {
 	print_it();
 }
 
-void XMLProcessor::process() {
+void XMLProcessor::filter() {
 	char c;
 	bool in_tag = false;       // says that processing is inside <,> brackets
-	int in_proh = 0;           // nesting level of prohibited tag
 	std::string buffer;        // working buffer - usually contains tag which is currently processed
-	std::string start_tag;     // if processing is "in_proh" state it contains name of prohibited tag
+	std::string tag;           // work tag name
 
 	while(1) {
 		/* Wait till input is ready or filter is terminated */
-		//sem_wait(full);
 		shared_c_full_mutex.lock();
 
 		c = shared_c;
-		//std::cout << "pr: shared_c get as " << c << std::endl;
 
 		/* tell writer that input is processed */
-		//sem_post(empty);
 		shared_c_empty_mutex.unlock();
 
 		/* get out of the loop whe Filter is terminated */
@@ -93,20 +90,20 @@ void XMLProcessor::process() {
 			buffer += c;
 			if (c == '>') {
 				/* process buffer - it contains complete tag at this point */
-				if (end_of_prohibited_tag(buffer, start_tag)) {
-					if (in_proh > 0) {
+				if (end_of_prohibited_tag(buffer, tag)) {
+					if (in_prohibited()) {
 						/* decrease nesting level of prohibited tag */
-						--in_proh;
+						if (prohibited[tag] > 0) --prohibited[tag];
 					}
 				}
-				else if (start_of_prohibited_tag(buffer, start_tag)) {
+				else if (start_of_prohibited_tag(buffer, tag)) {
 					/* check for single tag */
 					if (buffer[buffer.size() - 2] != '/') {
 						/* increase nesting level of prohibited tag */
-						++in_proh;
+						++prohibited[tag];
 					}
 				}
-				else if (in_proh == 0){
+				else if (!in_prohibited()){
 					/* buffer contains allowed tag so append it to return string */
 					ret_s_mutex.lock();
 					ret_s += buffer;
@@ -123,7 +120,7 @@ void XMLProcessor::process() {
 				in_tag = true;
 				buffer += c;
 			}
-			else if (in_proh == 0) {
+			else if (!in_prohibited()) {
 				/* c is simple character - append it to return string */
 				ret_s_mutex.lock();
 				ret_s += c;
@@ -132,62 +129,45 @@ void XMLProcessor::process() {
 		}
 
 	}
-	std::cout << "Filter process() done." << std::endl;
-
 }
 
 void XMLProcessor::terminate() {
 	terminated = true;
-	/* Signal process() that char reading is finished */
+	/* Signal filter() that char reading is finished */
 	shared_c_full_mutex.unlock();
-	std::cout << "Filter terminate()" << std::endl;
 }
 
-/* todo */
-/**
- * Determines if tag is terminate tag of "prohibited" tag
- * @param st which contains complete content of parsed tag including <,> brackets
- * @param tag_name contains name of "prohibited" tag
- * @return true if input tag is found to be terminating "prohibited" tag
- */
-bool end_of_prohibited_tag(const std::string& s, const std::string& tag_name) {
-	std::vector<std::string> prohibited = {"img", "object", "script"};
-	std::string cs;
-
-	/* sanity check */
-	if ((s.length() <= 4) || (s.substr(0,2) != "</"))
+bool XMLProcessor::end_of_prohibited_tag(const std::string& s, std::string& tagname) {
+	//* sanity check */
+	if ((s.length() <= 4) || (s.substr(0,2) != "</") || (s[s.length() - 1] != '>'))
 		return false;
 	
-	/* compare tag name with prohibited tags */
-	cs = s.substr(2, s.length() - 3);         //contains tag name only 
-	for (unsigned i = 0; i < prohibited.size(); i++) {
-		if (cs.compare(prohibited[i]) == 0) {
-			return true;
-		}
-	}
-	return false;
+	/* check if tag name is in prohibited set */
+	tagname = s.substr(2, s.length() - 3); 
+	std::transform(tagname.begin(), tagname.end(), tagname.begin(), tolower);
+	return prohibited.count(tagname);  
 }
 
-/**
-* Determines if tag is "prohibited"
-* @param st which contains complete content of parsed tag including <,> brackets
-* @param tag_name if returns true then simple name of prohibited tag is set
-* @return true if input tag is found prohibited
-*/
-bool start_of_prohibited_tag(const std::string& st, std::string& tag_name) {
-	std::vector<std::string> prohibited = {"img", "object", "script"};
-	std::string nonalpha(" \t\f\v\n\r/>");
-	size_t end_of_tagname;
+bool XMLProcessor::start_of_prohibited_tag(const std::string& s, std::string& tagname) {
+	//* sanity check */
+	if ((s.length() <= 3) || (s[0] != '<') || (s[s.length() - 1] != '>'))
+		return false;
 	
-	end_of_tagname = st.find_first_of(nonalpha, 1) - 1;
-	tag_name = st.substr(1, end_of_tagname);
-	std::transform(tag_name.begin(), tag_name.end(), tag_name.begin(), tolower);
-	for (unsigned i = 0; i < prohibited.size(); i++) {
-		if (tag_name.compare(prohibited[i]) == 0) {
-			return true;
-		}
-	}
-	return false;
+	/* check if tag name is in prohibited set */
+	std::string nonalpha(" \t\f\v\n\r/>");
+	tagname = s.substr(1, s.find_first_of(nonalpha, 1) - 1);
+	std::transform(tagname.begin(), tagname.end(), tagname.begin(), tolower);
+	return prohibited.count(tagname);  
 }
 
+bool XMLProcessor::in_prohibited() {
+	int sum = 0;
+	std::map<std::string, int>::const_iterator it = prohibited.begin();
+	while (it != prohibited.end()) {
+		sum += it->second;
+		++it;
+	}
+
+	return (sum > 0);
+}
 

@@ -13,8 +13,6 @@
 
 
 int main(int argc, char **argv) {
-	std::ifstream myfile;
-
 	/* read argument */
 	/*if (argc == 1) {
 		std::cerr << "You need to specify file." << std::endl;
@@ -28,8 +26,6 @@ int main(int argc, char **argv) {
 
 	/* init working threads */
 	xml_p.run();
-
-	myfile.close();
 
 	return 0;
 }
