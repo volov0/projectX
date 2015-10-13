@@ -141,7 +141,7 @@ bool XMLProcessor::end_of_prohibited_tag(const std::string& s, std::string& tagn
 	/* check if tag name is in prohibited set */
 	tagname = s.substr(2, s.length() - 3); 
 	std::transform(tagname.begin(), tagname.end(), tagname.begin(), tolower);
-	return prohibited.count(tagname);  
+	return (prohibited.count(tagname) > 0);  
 }
 
 bool XMLProcessor::start_of_prohibited_tag(const std::string& s, std::string& tagname) const {
@@ -153,7 +153,7 @@ bool XMLProcessor::start_of_prohibited_tag(const std::string& s, std::string& ta
 	std::string nonalpha(" \t\f\v\n\r/>");
 	tagname = s.substr(1, s.find_first_of(nonalpha, 1) - 1);
 	std::transform(tagname.begin(), tagname.end(), tagname.begin(), tolower);
-	return prohibited.count(tagname);  
+	return (prohibited.count(tagname) > 0);  
 }
 
 bool XMLProcessor::in_prohibited() const {
