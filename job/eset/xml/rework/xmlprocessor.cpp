@@ -6,7 +6,6 @@
 
 #include "xmlprocessor.h"
 #include <string>
-#include <iostream>
 #include <fstream>
 #include <thread>
 #include <mutex>

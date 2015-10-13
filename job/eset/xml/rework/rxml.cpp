@@ -4,11 +4,7 @@
  * @brief  XML parser with <thread>
  */
 
-#include <string>      
-#include <iostream>      
 #include <fstream>        
-#include <thread>             
-#include <regex>             
 #include "xmlprocessor.h"       
 
 
