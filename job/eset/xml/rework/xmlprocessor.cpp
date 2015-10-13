@@ -13,15 +13,13 @@
 #include <algorithm>
 
 
-XMLProcessor::XMLProcessor(char *filename) {
+XMLProcessor::XMLProcessor(char *filename) : terminated(false) {
 	/* Open input file */
 	file.open(filename);
 	if (!file.is_open()) {
 		std::cout << "Can't open file." << std::endl;
 		exit(2);
 	}
-
-	terminated = false;
 
 	/* Init lock state */
 	shared_c_full_mutex.lock();
