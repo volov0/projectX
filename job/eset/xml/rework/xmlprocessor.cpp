@@ -51,7 +51,6 @@ void XMLProcessor::reader_writer() {
 		shared_c_empty_mutex.lock();
 
 		shared_c = c;
-		//std::cout << "rw: shared_c set as " << c << std::endl;
 
 		/* Signal filter() that char is ready to process */
 		shared_c_full_mutex.unlock();
@@ -137,7 +136,7 @@ void XMLProcessor::terminate() {
 	shared_c_full_mutex.unlock();
 }
 
-bool XMLProcessor::end_of_prohibited_tag(const std::string& s, std::string& tagname) {
+bool XMLProcessor::end_of_prohibited_tag(const std::string& s, std::string& tagname) const {
 	//* sanity check */
 	if ((s.length() <= 4) || (s.substr(0,2) != "</") || (s[s.length() - 1] != '>'))
 		return false;
@@ -148,7 +147,7 @@ bool XMLProcessor::end_of_prohibited_tag(const std::string& s, std::string& tagn
 	return prohibited.count(tagname);  
 }
 
-bool XMLProcessor::start_of_prohibited_tag(const std::string& s, std::string& tagname) {
+bool XMLProcessor::start_of_prohibited_tag(const std::string& s, std::string& tagname) const {
 	//* sanity check */
 	if ((s.length() <= 3) || (s[0] != '<') || (s[s.length() - 1] != '>'))
 		return false;
@@ -160,10 +159,10 @@ bool XMLProcessor::start_of_prohibited_tag(const std::string& s, std::string& ta
 	return prohibited.count(tagname);  
 }
 
-bool XMLProcessor::in_prohibited() {
+bool XMLProcessor::in_prohibited() const {
 	int sum = 0;
 
-	std::map<std::string, int>::iterator it;
+	std::map<std::string, int>::const_iterator it;
 	for (it = prohibited.begin(); it != prohibited.end(); ++it) {
 		sum += it->second;
 	}

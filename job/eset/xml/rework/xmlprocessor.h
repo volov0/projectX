@@ -28,7 +28,7 @@ private:
 	std::mutex shared_c_empty_mutex;  /**< input char mutex */
 	std::mutex shared_c_full_mutex;   /**< input char mutex */
 
-	std::map<std::string, int> prohibited; /**< map of prohibited tags*/
+	std::map<std::string, int> prohibited; /**< map of prohibited tags */
 
 public:
 	/**
@@ -77,7 +77,7 @@ private:
 	 * @param tagname  simple plain text name of tag is set
 	 * @return true if input tag is found to be terminating "prohibited" tag
 	 */
-	bool end_of_prohibited_tag(const std::string& s, std::string& tagname);
+	bool end_of_prohibited_tag(const std::string& s, std::string& tagname) const;
 
 	/**
 	 * Determines if tag is "prohibited"
@@ -85,12 +85,12 @@ private:
 	 * @param tagname true simple plain text name of tag is set
 	 * @return true if input tag is found prohibited
 	 */
-	 bool start_of_prohibited_tag(const std::string& s, std::string& tagname);
+	 bool start_of_prohibited_tag(const std::string& s, std::string& tagname) const;
 
 	/**
 	 * Determines if filter processing is currently inside of "prohibited" tag
 	 * @return true if processing is inside "prohibited" tag
 	 */
-	 bool in_prohibited();
+	 bool in_prohibited() const;
 };
 #endif /* XMLPROCESSOR_H */

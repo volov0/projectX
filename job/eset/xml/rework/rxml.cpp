@@ -14,15 +14,13 @@
 
 int main(int argc, char **argv) {
 	/* read argument */
-	/*if (argc == 1) {
+	if (argc == 1) {
 		std::cerr << "You need to specify file." << std::endl;
 		return 1;
-	}*/
+	}
 
 	/* Inint xml processor */
-	char fn[] = "index.xml";
-	//XMLProcessor xml_p(argv[1]);
-	XMLProcessor xml_p(fn);
+	XMLProcessor xml_p(argv[1]);
 
 	/* init working threads */
 	xml_p.run();
