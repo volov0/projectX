@@ -162,10 +162,10 @@ bool XMLProcessor::start_of_prohibited_tag(const std::string& s, std::string& ta
 
 bool XMLProcessor::in_prohibited() {
 	int sum = 0;
-	std::map<std::string, int>::const_iterator it = prohibited.begin();
-	while (it != prohibited.end()) {
+
+	std::map<std::string, int>::iterator it;
+	for (it = prohibited.begin(); it != prohibited.end(); ++it) {
 		sum += it->second;
-		++it;
 	}
 
 	return (sum > 0);
