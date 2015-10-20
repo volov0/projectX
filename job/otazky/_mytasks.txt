@@ -1,0 +1,2 @@
+1. Naimplementovat frontu pomoci named pipe (mkfifo)
+2. Naimplementovat generickou frontu.
