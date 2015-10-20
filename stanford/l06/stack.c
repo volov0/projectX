@@ -10,7 +10,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include "int_stack.h"
-#include "generic_stack.h"
+#include "../../library/stack/generic_stack.h"
 
 void string_free(void *p) {
 	free(*(char **)p);
