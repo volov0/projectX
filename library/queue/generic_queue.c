@@ -13,6 +13,7 @@ void queue_new(queue *q, int elem_size, void (*freefn)(void *)) {
 	assert(elem_size);           // safety first
 	q->elem_size = elem_size;
 	q->freefn = freefn;
+	q->front = 0;
 	q->logical_length = 0;
 	q->allocated_length = QUEUE_INIT_SIZE;
 	q->elem = malloc(QUEUE_INIT_SIZE * q->elem_size);
@@ -59,7 +60,8 @@ void queue_push(queue *q, void *elem_addr) {
 void queue_pop(queue *q, void *elem_addr) {
 	assert(q->logical_length > 0);
 	/* opet musim udelat pretypovani na (char*) kvuli pointer aritmetice */
+	memcpy(elem_addr, ((char *)q->elem) + q->elem_size * q->front, q->elem_size);
 	q->logical_length--;
-	memcpy(elem_addr, ((char *)q->elem) + q->elem_size * ((q->logical_length + q->front) & q->allocated_length), q->elem_size);
+	q->front = (q->front + 1) % q->allocated_length;
 }
 
