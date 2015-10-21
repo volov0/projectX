@@ -65,7 +65,7 @@ void queue_push(queue *q, void *elem_addr);
  * @elem_addr - adresa prvku, kde se vrati nejstarsi prvek z fronty
  * @detail Vybere prvek z fronty a vrati ho.
  */
-void stack_pop(queue *q, void *elem_addr);
+void queue_pop(queue *q, void *elem_addr);
 
 
 #endif  /* GENERIC_QUEUE_H */

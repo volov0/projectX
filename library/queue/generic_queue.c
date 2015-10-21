@@ -35,7 +35,7 @@ void queue_dispose(queue *q) {
 	free(q->elem);
 }
 
-void QueueGrow(queue *q) {
+static void QueueGrow(queue *q) {
 	void *old_elem = q->elem;
 	q->elem = malloc(q->allocated_length * 2 * q->elem_size);
 	assert(q->elem != NULL);
