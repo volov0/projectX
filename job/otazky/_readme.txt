@@ -9,3 +9,4 @@
 9. suggest - navrhni funkci napovedy pro dokonceni textu (a zamysli se nad slozitosti) (google)
 10.interval - Máš seznam nepřekrývajících se intervalů (např. (1,2)(4,7)(9,13)) a k tomu jeden samostatný interval (5,15). Vhodnou metodou je spoj do utříděného seznamu dvou intervalu (1,2)(4,15). (google)
 11.dup_numbers - na vstupu je pole integeru, vystup je pole cisel, ktere byly ve vstupnim poli duplicitne
+12.logshift - rozdil mezi aritmetickym a logickym shiftem

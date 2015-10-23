@@ -17,7 +17,7 @@ TARGETS  := $(notdir $(SOURCES:.c=))
 #INCLUDES := $(wildcard *.hpp)
 #OBJECTS  := $(SOURCES:.cpp=*.o)
 
-all: revstr secpower
+all: revstr secpower logshift
 	@echo ...compilation done...
 
 revstr: revstr.o
@@ -25,6 +25,9 @@ revstr: revstr.o
 
 secpower: secpower.o
 	$(CC) $(OFLAGS) secpower.o -o secpower
+
+logshift: logshift.o
+	$(CC) $(OFLAGS) logshift.o -o logshift
 
 #    $@ ... leva strana :
 #    $^ ... prava strana :  (zavislosti)

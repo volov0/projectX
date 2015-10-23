@@ -12,11 +12,10 @@
  * @return 1 if input number n is power of two, 0 otherwise
  */
 int secpower(int n) {
-	int i = n;
 	while(1) {
-		if (i & 0x1) return 0;
-		if (i == 2) return 1;
-		i = i >> 1;
+		if (n & 0x1) return 0;
+		if (n == 2) return 1;
+		n >>= 1;
 	}
 }
 
