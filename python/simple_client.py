@@ -4,12 +4,14 @@
 import socket
 
 port = 1234
+#addr = "localhost"
+addr = "10.0.2.15"
 
 # create an INET, STREAMing socket
 clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # now connect to the web server on port 80 - the normal http port
-clientsocket.connect(("localhost", port))
+clientsocket.connect((addr, port))
 
 clientsocket.send("aaaaa")
 
